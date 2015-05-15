@@ -4,7 +4,7 @@
      O~~    O~~  O~~  O~~    O~~   
        O~~~   O~~    O~~~      O~~~
 
-Use corc to read and write data in the Optimized Row Columnar (ORC) file format in your Cascading applications. The reading of ORC delta datasets is also supported.
+Use corc to read and write data in the [Optimized Row Columnar (ORC)](http://orc.apache.org/) file format in your Cascading applications. The reading of [ACID](http://orc.apache.org/docs/acid.html) datasets is also supported.
 
 #Start using
 
@@ -38,7 +38,7 @@ Corc is built with Hive 1.0.0. Several dependencies will need to be included whe
     </dependency>
 
 #Overview
-##Supported types
+##[Supported types](http://orc.apache.org/docs/types.html)
 
 <table>
   <tr><th>Hive</th><th>Cascading/Java</th></tr>
@@ -91,7 +91,7 @@ Specify the complete schema of the underlying ORC Files. This is only required f
     // or
     builder.schema(structTypeInfoString);
 
-ORC Files support predicate pushdown. This allows whole row groups to be skipped if they do not contain any rows that match the given `SearchArgument`:
+ORC Files support [predicate pushdown](http://orc.apache.org/docs/indexes.html). This allows whole row groups to be skipped if they do not contain any rows that match the given `SearchArgument`:
 
     Fields message = new Fields("message", String.class);
     SearchArgument searchArgument = SearchArgumentFactory.newBuilder()
@@ -144,7 +144,7 @@ or, via the convenience builder...
         .build();
 
 ##Reading transactional Hive tables
-Corc also supports the reading of datasets that underpin [transactional Hive tables](https://cwiki.apache.org/confluence/display/Hive/Hive+Transactions). However, for this to work effectively with an active Hive table you must provide your own lock management. We intend to make this functionality available in the [cascading-hive](https://github.com/HotelsDotCom/cascading-hive/tree/acid) project. When reading the data you may optionally include the virtual `RecordIdentifer` column, also known as the `ROW__ID` column, with one of the following approaches:
+Corc also supports the reading of [ACID datasets](http://orc.apache.org/docs/acid.html) that underpin [transactional Hive tables](https://cwiki.apache.org/confluence/display/Hive/Hive+Transactions). However, for this to work effectively with an active Hive table you must provide your own lock management. We intend to make this functionality available in the [cascading-hive](https://github.com/HotelsDotCom/cascading-hive/tree/acid) project. When reading the data you may optionally include the virtual `RecordIdentifer` column, also known as the `ROW__ID` column, with one of the following approaches:
 
 1. Add a field named '`ROW__ID`' to your `Fields` definition. This must be of type `org.apache.hadoop.hive.ql.io.RecordIdentifier`. For convenience you can use the constant `OrcFile#ROW__ID` with some fields arithmetic: `Fields myFields = Fields.join(OrcFile.ROW__ID, myFields);`.
 2. Use the `OrcFile.source().prependRowId()` option. Be sure to exclude the `RecordIdentifer` column from your `typeInfo` instance. The `ROW__ID` field will be added to your tuple stream automatically.
