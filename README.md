@@ -93,12 +93,13 @@ Specify the complete schema of the underlying ORC Files. This is only required f
 
 ORC Files support predicate pushdown. This allows whole row groups to be skipped if they do not contain any rows that match the given `SearchArgument`:
 
+    Fields message = new Fields("message", String.class);
     SearchArgument searchArgument = SearchArgumentFactory.newBuilder()
         .startAnd()
-        .equals("col0", "hello")
+        .equals(message, "hello")
         .end()
         .build();
-
+    
     builder.searchArgument(searchArgument);
 
 When reading ORC Files that back a transactional Hive table, include the `VirtualColumn#ROWID` ("ROW__ID") virtual column. The column will be prepended to the record's `Fields`:
