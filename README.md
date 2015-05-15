@@ -11,6 +11,12 @@ You can obtain **corc** from Maven Central :
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading/badge.svg?subject=com.hotels:corc-cascading)](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading) ![GitHub license](https://img.shields.io/github/license/HotelsDotCom/corc.svg)
 
+##Cascading Dependencies
+
+Corc has been built and tested against Cascading 3.0.2.
+
+There is a known issue in 3.0.0 (fixed in 3.0.2) when writing small ORC files with Cascading and Tez  (ie with only one stripe of data). At the point of committing the output, the writer has not flushed or closed so the ORC file is not materialized on disk.
+
 ##Hive Dependencies
 
 Corc is built with Hive 1.0.0. Several dependencies will need to be included when using Corc:

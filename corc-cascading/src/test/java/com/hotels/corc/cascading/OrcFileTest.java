@@ -55,6 +55,7 @@ import cascading.flow.Flow;
 import cascading.flow.FlowDef;
 import cascading.flow.hadoop.util.HadoopUtil;
 import cascading.flow.hadoop2.Hadoop2MR1FlowConnector;
+import cascading.flow.tez.Hadoop2TezFlowConnector;
 import cascading.pipe.Pipe;
 import cascading.tap.Tap;
 import cascading.tap.hadoop.Hfs;
@@ -593,7 +594,7 @@ public class OrcFileTest {
   }
 
   @Test
-  public void readWriteInFlow() throws IOException {
+  public void readWriteInFlowMR1() throws IOException {
     try (OrcWriter writer = new OrcWriter.Builder(conf, new Path(path, "part-00000"))
         .addField("a", TypeInfoFactory.stringTypeInfo)
         .addField("b", TypeInfoFactory.stringTypeInfo)
@@ -616,6 +617,46 @@ public class OrcFileTest {
     flow.cleanup();
 
     try (OrcReader reader = new OrcReader(conf, new Path(output, "part-00000"))) {
+      assertThat(reader.hasNext(), is(true));
+      List<Object> list = reader.next();
+      assertThat(list.size(), is(2));
+      assertThat(list.get(0), is((Object) "A1"));
+      assertThat(list.get(1), is((Object) "B1"));
+
+      assertThat(reader.hasNext(), is(true));
+      list = reader.next();
+      assertThat(list.size(), is(2));
+      assertThat(list.get(0), is((Object) "A2"));
+      assertThat(list.get(1), is((Object) "B2"));
+
+      assertThat(reader.hasNext(), is(false));
+    }
+  }
+
+  @Test
+  public void readWriteInFlowTez() throws IOException {
+    try (OrcWriter writer = new OrcWriter.Builder(conf, new Path(path, "part-00000"))
+        .addField("a", TypeInfoFactory.stringTypeInfo)
+        .addField("b", TypeInfoFactory.stringTypeInfo)
+        .build()) {
+      writer.addRow("A1", "B1");
+      writer.addRow("A2", "B2");
+    }
+
+    String output = new File(temporaryFolder.getRoot(), "output").getCanonicalPath();
+
+    Pipe pipe = new Pipe(UUID.randomUUID().toString());
+    FlowDef flowDef = FlowDef
+        .flowDef()
+        .setName(UUID.randomUUID().toString())
+        .addSource(pipe, new Hfs(OrcFile.source().declaredFields(FIELDS_AB).schemaFromFile().build(), path))
+        .addTailSink(pipe, new Hfs(OrcFile.sink().schema(FIELDS_AB).build(), output));
+
+    Flow<?> flow = new Hadoop2TezFlowConnector(HadoopUtil.createProperties(conf)).connect(flowDef);
+    flow.complete();
+    flow.cleanup();
+
+    try (OrcReader reader = new OrcReader(conf, new Path(output, "part-v000-o000-00000"))) {
       assertThat(reader.hasNext(), is(true));
       List<Object> list = reader.next();
       assertThat(list.size(), is(2));

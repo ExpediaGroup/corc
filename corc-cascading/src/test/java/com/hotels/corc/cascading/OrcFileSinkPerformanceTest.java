@@ -27,10 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
-import org.apache.hadoop.mapred.JobConf;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,11 +54,11 @@ public class OrcFileSinkPerformanceTest {
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Mock
-  private FlowProcess<JobConf> flowProcess;
+  private FlowProcess<Configuration> flowProcess;
 
   private StructTypeInfo structTypeInfo;
   private List<Tuple> tuples;
-  private Tap<JobConf, ?, ?> tap;
+  private Tap<Configuration, ?, ?> tap;
 
   @Before
   public void before() throws IOException {
@@ -66,7 +66,7 @@ public class OrcFileSinkPerformanceTest {
     tuples = createTuples();
     tap = createTap();
 
-    when(flowProcess.getConfigCopy()).thenReturn(new JobConf());
+    when(flowProcess.getConfigCopy()).thenReturn(new Configuration());
   }
 
   @Test
@@ -134,7 +134,7 @@ public class OrcFileSinkPerformanceTest {
     return map;
   }
 
-  private Tap<JobConf, ?, ?> createTap() throws IOException {
+  private Tap<Configuration, ?, ?> createTap() throws IOException {
     OrcFile orcFile = OrcFile.sink().schema(structTypeInfo).build();
     return new Hfs(orcFile, temporaryFolder.getRoot().getCanonicalPath());
   }
