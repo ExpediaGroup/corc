@@ -9,7 +9,9 @@ Use corc to read and write data in the [Optimized Row Columnar (ORC)](http://orc
 #Start using
 
 ##Maven Central
-* [com.hotels:corc-cascading](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22com.hotels%22%20AND%20a%3A%22corc-cascading%22)
+You can obtain corc from Maven Central using the following identifier:
+
+* [com.hotels:corc-cascading:1.0.0](http://search.maven.org/#artifactdetails%7Ccom.hotels%7Ccorc-cascading%7C1.0.0%7Cjar)
 
 ##Hive Dependencies
 
