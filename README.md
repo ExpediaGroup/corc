@@ -7,10 +7,9 @@
 Use corc to read and write data in the [Optimized Row Columnar (ORC)](http://orc.apache.org/) file format in your Cascading applications. The reading of [ACID](http://orc.apache.org/docs/acid.html) datasets is also supported.
 
 #Start using
+You can obtain **corc** from Maven Central : 
 
-##Maven Central
-
-* com.hotels:corc-cascading [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading/badge.svg?subject=com.hotels:corc-cascading)](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading)
 
 ##Hive Dependencies
 
