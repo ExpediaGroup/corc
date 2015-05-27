@@ -158,7 +158,7 @@ Corc also supports the reading of [ACID datasets](http://orc.apache.org/docs/aci
 
 #Credits
 
-Created by Dave Maughan & Elliot West, with thanks to: Patrick Duin, James Grant & Adrian Woodhead.
+Created by [Dave Maughan](https://github.com/nahguam) & [Elliot West](https://github.com/teabot), with thanks to: [Patrick Duin](https://github.com/patduin), [James Grant](https://github.com/noddy76) & [Adrian Woodhead](https://github.com/massdosage).
 
 #Legal
 This project is available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
