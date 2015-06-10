@@ -87,7 +87,7 @@ public class OrcFileSourcePerformanceTest {
     Path path = new Path(temporaryFolder.getRoot().getCanonicalPath(), "part-00000");
     List<Object> struct = new ArrayList<>(structTypeInfo.getAllStructFieldNames().size());
     try (OrcWriter writer = new OrcWriter(new Configuration(), path, structTypeInfo)) {
-      for (int i = 0; i < 1000000; i++) {
+      for (int i = 0; i < 2000000; i++) {
         Number n = i;
 
         struct.clear();
