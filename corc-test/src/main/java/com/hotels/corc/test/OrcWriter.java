@@ -27,6 +27,7 @@ import org.apache.hadoop.hive.ql.io.orc.OrcFile;
 import org.apache.hadoop.hive.ql.io.orc.OrcFile.WriterOptions;
 import org.apache.hadoop.hive.ql.io.orc.Writer;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
+import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
@@ -35,15 +36,18 @@ public class OrcWriter implements Closeable {
 
   private final Writer writer;
 
-  private OrcWriter(Builder builder) throws IOException {
-    TypeInfo typeInfo = TypeInfoFactory.getStructTypeInfo(builder.names, builder.typeInfos);
+  public OrcWriter(Configuration conf, Path path, StructTypeInfo typeInfo) throws IOException {
     ObjectInspector inspector = TypeInfoUtils.getStandardJavaObjectInspectorFromTypeInfo(typeInfo);
-    WriterOptions writerOptions = OrcFile.writerOptions(builder.conf).inspector(inspector);
-    writer = OrcFile.createWriter(builder.path, writerOptions);
+    WriterOptions writerOptions = OrcFile.writerOptions(conf).inspector(inspector);
+    writer = OrcFile.createWriter(path, writerOptions);
   }
 
   public void addRow(Object... values) throws IOException {
-    writer.addRow(Arrays.asList(values));
+    addRow(Arrays.asList(values));
+  }
+
+  public void addRow(List<Object> struct) throws IOException {
+    writer.addRow(struct);
   }
 
   @Override
@@ -70,7 +74,8 @@ public class OrcWriter implements Closeable {
     }
 
     public OrcWriter build() throws IOException {
-      return new OrcWriter(this);
+      StructTypeInfo typeInfo = (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(names, typeInfos);
+      return new OrcWriter(conf, path, typeInfo);
     }
 
   }
