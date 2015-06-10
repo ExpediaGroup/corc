@@ -310,9 +310,8 @@
           </reportSet>
         </reportSets>
       </plugin>
-      <!-- The JXR plugin produces a cross-reference of the project's sources. The generated reports make it easier for the 
-        user to reference or find specific lines of code. It is also handy when used with the PMD plugin for referencing errors found 
-        in the code. -->
+      <!-- The JXR plugin produces a cross-reference of the project's sources. The generated reports make it easier for the user to reference or find specific lines 
+        of code. It is also handy when used with the PMD plugin for referencing errors found in the code. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
@@ -370,6 +369,54 @@
   </reporting>
 
   <profiles>
+    <profile>
+      <id>unit-test</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludes>
+                <exclude>**/*PerformanceTest.java</exclude>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>performance-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>**/*PerformanceTest.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>unit-and-performance-test</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <includes>
+                <include>**/*Test.java</include>
+              </includes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>doclint-java8-disable</id>
       <activation>
