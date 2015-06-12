@@ -422,8 +422,8 @@ public class OrcFileTest {
     struct.add("hello");
 
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
-      writer.addRow(struct);
-      writer.addRow((List<Object>) null);
+      writer.addRow((Object) struct);
+      writer.addRow((Object) null);
     }
 
     List<Tuple> list = read(typeInfo);
@@ -482,9 +482,9 @@ public class OrcFileTest {
     struct3.add(null);
 
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
-      writer.addRow(struct1);
-      writer.addRow(struct2);
-      writer.addRow(struct3);
+      writer.addRow((Object) struct1);
+      writer.addRow((Object) struct2);
+      writer.addRow((Object) struct3);
       writer.addRow((Object) null);
     }
 
