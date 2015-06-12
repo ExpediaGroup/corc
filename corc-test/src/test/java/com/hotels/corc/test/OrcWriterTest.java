@@ -56,7 +56,6 @@ public class OrcWriterTest {
     List<Object> next = (List<Object>) ObjectInspectorUtils.copyToStandardJavaObject(rows.next(null),
         reader.getObjectInspector());
     assertThat(next.size(), is(1));
-    System.out.println(next.get(0).getClass());
     assertThat(next.get(0), is((Object) "hello"));
     assertThat(rows.hasNext(), is(false));
 
