@@ -85,7 +85,7 @@ public class OrcFileSinkPerformanceTest {
   private List<Tuple> createTuples() {
     List<Tuple> tuples = new LinkedList<>();
     Tuple tuple = Tuple.size(structTypeInfo.getAllStructFieldNames().size());
-    for (int i = 0; i < 2000000; i++) {
+    for (int i = 0; i < 1000000; i++) {
       Number n = i;
 
       tuple.clear();
