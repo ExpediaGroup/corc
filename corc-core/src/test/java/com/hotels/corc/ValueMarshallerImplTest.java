@@ -63,6 +63,17 @@ public class ValueMarshallerImplTest {
     verify(converter).toJavaObject(text);
   }
 
+  @Test
+  public void getWritable() throws UnexpectedTypeException {
+    when(inspector.getStructFieldData(null, structField)).thenReturn(text);
+
+    Object writableObject = marshaller.getWritableObject(null);
+
+    assertThat(writableObject, is((Object) text));
+
+    verify(inspector).getStructFieldData(null, structField);
+  }
+
   @Test(expected = UnexpectedTypeException.class)
   public void getJavaException() throws UnexpectedTypeException {
     when(inspector.getStructFieldData(null, structField)).thenReturn(text);

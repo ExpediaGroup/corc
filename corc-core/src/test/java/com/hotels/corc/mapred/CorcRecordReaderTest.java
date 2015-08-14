@@ -42,6 +42,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.corc.ConverterFactory;
 import com.hotels.corc.Corc;
+import com.hotels.corc.Filter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CorcRecordReaderTest {
@@ -55,7 +56,7 @@ public class CorcRecordReaderTest {
   public void readerCreateKey() {
     @SuppressWarnings("unchecked")
     RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     reader.createKey();
     verify(recordReader).createKey();
@@ -65,7 +66,7 @@ public class CorcRecordReaderTest {
   public void readerCreateValue() {
     @SuppressWarnings("unchecked")
     RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     Corc corc = reader.createValue();
     verify(recordReader, never()).createValue();
@@ -80,7 +81,7 @@ public class CorcRecordReaderTest {
   public void readerGetPos() throws IOException {
     @SuppressWarnings("unchecked")
     RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     reader.getPos();
     verify(recordReader).getPos();
@@ -90,7 +91,7 @@ public class CorcRecordReaderTest {
   public void readerGetProgress() throws IOException {
     @SuppressWarnings("unchecked")
     RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     reader.getProgress();
     verify(recordReader).getProgress();
@@ -100,7 +101,7 @@ public class CorcRecordReaderTest {
   public void readerClose() throws IOException {
     @SuppressWarnings("unchecked")
     RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     reader.close();
     verify(recordReader).close();
@@ -110,7 +111,7 @@ public class CorcRecordReaderTest {
   public void readerNext() throws IOException {
     @SuppressWarnings("unchecked")
     RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     Corc corc = mock(Corc.class);
 
@@ -127,7 +128,7 @@ public class CorcRecordReaderTest {
   public void readerNoNext() throws IOException {
     @SuppressWarnings("unchecked")
     RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     Corc corc = mock(Corc.class);
 
@@ -141,10 +142,30 @@ public class CorcRecordReaderTest {
   }
 
   @Test
+  public void readerNoNextFilterNotAccept() throws IOException {
+    @SuppressWarnings("unchecked")
+    RecordReader<NullWritable, OrcStruct> recordReader = mock(RecordReader.class);
+
+    Filter filter = mock(Filter.class);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, filter);
+
+    Corc corc = mock(Corc.class);
+
+    when(recordReader.next(any(NullWritable.class), any(OrcStruct.class))).thenReturn(true).thenReturn(false);
+    when(filter.accept(corc)).thenReturn(false);
+
+    boolean next = reader.next(NullWritable.get(), corc);
+
+    assertFalse(next);
+
+    verify(corc, never()).setRecordIdentifier(any(RecordIdentifier.class));
+  }
+
+  @Test
   public void readerNextTransactional() throws IOException {
     @SuppressWarnings("unchecked")
     AcidRecordReader<NullWritable, OrcStruct> recordReader = mock(AcidRecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     Corc corc = mock(Corc.class);
 
@@ -161,7 +182,7 @@ public class CorcRecordReaderTest {
   public void readerNoNextTransactional() throws IOException {
     @SuppressWarnings("unchecked")
     AcidRecordReader<NullWritable, OrcStruct> recordReader = mock(AcidRecordReader.class);
-    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory);
+    CorcRecordReader reader = new CorcRecordReader(typeInfo, recordReader, factory, Filter.ACCEPT);
 
     Corc corc = mock(Corc.class);
 

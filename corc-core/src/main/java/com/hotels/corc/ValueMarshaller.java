@@ -27,12 +27,19 @@ interface ValueMarshaller {
     }
 
     @Override
+    public Object getWritableObject(OrcStruct struct) {
+      return null;
+    }
+
+    @Override
     public void setWritableObject(OrcStruct struct, Object javaObject) throws UnexpectedTypeException {
       // do nothing
     }
   };
 
   Object getJavaObject(OrcStruct struct) throws UnexpectedTypeException;
+
+  Object getWritableObject(OrcStruct struct);
 
   void setWritableObject(OrcStruct struct, Object javaObject) throws UnexpectedTypeException;
 

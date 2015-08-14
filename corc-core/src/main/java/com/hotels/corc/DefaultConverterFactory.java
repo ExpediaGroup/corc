@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.hive.common.type.HiveChar;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
@@ -239,7 +240,9 @@ public class DefaultConverterFactory implements ConverterFactory {
 
     @Override
     protected Object toJavaObjectInternal(Object value) throws UnexpectedTypeException {
-      return ((DateWritable) value).get();
+      // DateWritable applies timezone offset on get(), we don't want that
+      int days = ((DateWritable) value).getDays();
+      return new Date(TimeUnit.DAYS.toMillis(days));
     }
 
   }

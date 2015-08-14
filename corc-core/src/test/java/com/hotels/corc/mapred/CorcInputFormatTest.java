@@ -15,6 +15,7 @@
  */
 package com.hotels.corc.mapred;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -45,7 +46,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.hotels.corc.Corc;
 import com.hotels.corc.DefaultConverterFactory;
+import com.hotels.corc.Filter;
 import com.hotels.corc.StructTypeInfoBuilder;
+import com.hotels.corc.sarg.SearchArgumentFilter;
 import com.hotels.corc.test.OrcWriter;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -272,7 +275,7 @@ public class CorcInputFormatTest {
   }
 
   @Test
-  public void searchArgument() {
+  public void setSearchArgument() {
     SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
     CorcInputFormat.setSearchArgument(conf, searchArgument);
 
@@ -282,12 +285,62 @@ public class CorcInputFormatTest {
   }
 
   @Test
-  public void searchArgumentNull() {
+  public void setSearchArgumentKryo() {
+    CorcInputFormat.setSearchArgumentKryo(conf, null);
+
+    String kryo = conf.get(CorcInputFormat.SEARCH_ARGUMENT);
+
+    assertThat(kryo, is(nullValue()));
+  }
+
+  @Test
+  public void setSearchArgumentNull() {
     CorcInputFormat.setSearchArgument(conf, null);
 
     String kryo = conf.get(CorcInputFormat.SEARCH_ARGUMENT);
 
     assertThat(kryo, is(nullValue()));
+  }
+
+  @Test
+  public void getSearchArgument() {
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
+    conf.set(CorcInputFormat.SEARCH_ARGUMENT, searchArgument.toKryo());
+
+    String kryo = CorcInputFormat.getSearchArgument(conf).toKryo();
+
+    assertThat(kryo, is(searchArgument.toKryo()));
+  }
+
+  @Test
+  public void getFilterDisabledSearchArgument() {
+    StructTypeInfo typeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
+    conf.set(CorcInputFormat.SEARCH_ARGUMENT, searchArgument.toKryo());
+    conf.setBoolean(CorcInputFormat.ENABLE_ROW_LEVEL_SEARCH_ARGUMENT, false);
+
+    assertThat(CorcInputFormat.getFilter(conf, typeInfo), is(Filter.ACCEPT));
+  }
+
+  @Test
+  public void getFilterNoSearchArgument() {
+    StructTypeInfo typeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
+    assertThat(CorcInputFormat.getFilter(conf, typeInfo), is(Filter.ACCEPT));
+  }
+
+  @Test
+  public void getFilterWithSearchArgument() {
+    StructTypeInfo typeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
+    conf.set(CorcInputFormat.SEARCH_ARGUMENT, searchArgument.toKryo());
+    assertThat(CorcInputFormat.getFilter(conf, typeInfo), instanceOf(SearchArgumentFilter.class));
+  }
+
+  @Test
+  public void getSearchArgumentNull() {
+    SearchArgument searchArgument = CorcInputFormat.getSearchArgument(conf);
+
+    assertThat(searchArgument, is(nullValue()));
   }
 
   @Test(expected = RuntimeException.class)

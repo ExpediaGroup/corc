@@ -102,6 +102,25 @@ ORC Files support [predicate pushdown](http://orc.apache.org/docs/indexes.html).
     
     builder.searchArgument(searchArgument);
 
+When passing objects to the `SearchArgument.Builder`, care should be taken to choose the correct type:
+
+<table>
+  <tr><th>Hive</th><th>Java</th></tr>
+  <tr><td>STRING</td><td>String</td></tr>
+  <tr><td>BOOLEAN</td><td>Boolean</td></tr>
+  <tr><td>TINYINT</td><td>Byte</td></tr>
+  <tr><td>SMALLINT</td><td>Short</td></tr>
+  <tr><td>INT</td><td>Integer</td></tr>
+  <tr><td>BIGINT</td><td>Long</td></tr>
+  <tr><td>FLOAT</td><td>Float</td></tr>
+  <tr><td>DOUBLE</td><td>Double</td></tr>
+  <tr><td>TIMESTAMP</td><td>java.sql.Timestamp</td></tr>
+  <tr><td>DATE</td><td>org.apache.hadoop.hive.serde2.io.DateWritable</td></tr>
+  <tr><td>CHAR</td><td>String (HiveChar)</td></tr>
+  <tr><td>VARCHAR</td><td>String (HiveVarchar)</td></tr>
+  <tr><td>DECIMAL</td><td>BigDecimal</td></tr>
+</table>
+
 When reading ORC Files that back a transactional Hive table, include the `VirtualColumn#ROWID` ("ROW__ID") virtual column. The column will be prepended to the record's `Fields`:
 
     builder.prependRowId();

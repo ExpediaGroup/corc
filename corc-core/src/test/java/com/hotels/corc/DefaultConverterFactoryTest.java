@@ -58,12 +58,6 @@ import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.junit.Test;
 
-import com.hotels.corc.Converter;
-import com.hotels.corc.ConverterFactory;
-import com.hotels.corc.DefaultConverterFactory;
-import com.hotels.corc.StructTypeInfoBuilder;
-import com.hotels.corc.UnexpectedTypeException;
-
 public class DefaultConverterFactoryTest {
 
   private final ConverterFactory factory = new DefaultConverterFactory();

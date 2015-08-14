@@ -29,6 +29,7 @@ import org.apache.hadoop.hive.ql.io.orc.OrcSplit;
 import org.apache.hadoop.hive.ql.io.orc.OrcStruct;
 import org.apache.hadoop.hive.ql.io.orc.Reader;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
+import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
 import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
@@ -47,10 +48,12 @@ import org.slf4j.LoggerFactory;
 
 import com.hotels.corc.ConverterFactory;
 import com.hotels.corc.Corc;
+import com.hotels.corc.Filter;
+import com.hotels.corc.sarg.SearchArgumentFilter;
 
 /**
- * A wrapper for {@link OrcInputFormat} to expose {@link Corc} as the value type instead of {@link OrcStruct}.
- * This enables column access by name instead of by position.
+ * A wrapper for {@link OrcInputFormat} to expose {@link Corc} as the value type instead of {@link OrcStruct}. This
+ * enables column access by name instead of by position.
  */
 public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
 
@@ -62,6 +65,12 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
   static final String SEARCH_ARGUMENT = "sarg.pushdown";
   static final int ATOMIC_ROW_COLUMN_ID;
   static final String ATOMIC_ROW_COLUMN_NAME = "row";
+
+  /**
+   * If a {@link SearchArgument} is provided, by default it will be applied at the row level as well as at the row group
+   * level. Set this configuration option to false to disable row level evaluation.
+   */
+  public static final String ENABLE_ROW_LEVEL_SEARCH_ARGUMENT = "com.hotels.corc.mapred.input.enable.row.level.search.argument";
 
   static {
     ATOMIC_ROW_COLUMN_ID = getOrcAtomicRowColumnId();
@@ -146,6 +155,14 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
     }
   }
 
+  static SearchArgument getSearchArgument(Configuration conf) {
+    String searchArgumentKryo = conf.get(SEARCH_ARGUMENT);
+    if (searchArgumentKryo == null) {
+      return null;
+    }
+    return SearchArgumentFactory.create(searchArgumentKryo);
+  }
+
   /**
    * Sets which fields are to be read from the ORC file
    */
@@ -184,6 +201,16 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
     return orcInputFormat.getSplits(conf, numSplits);
   }
 
+  static Filter getFilter(Configuration conf, StructTypeInfo typeInfo) {
+    if (conf.getBoolean(ENABLE_ROW_LEVEL_SEARCH_ARGUMENT, true)) {
+      SearchArgument searchArgument = getSearchArgument(conf);
+      if (searchArgument != null) {
+        return new SearchArgumentFilter(searchArgument, typeInfo);
+      }
+    }
+    return Filter.ACCEPT;
+  }
+
   @Override
   public RecordReader<NullWritable, Corc> getRecordReader(InputSplit inputSplit, JobConf conf, Reporter reporter)
       throws IOException {
@@ -193,7 +220,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
     }
     setReadColumns(conf, typeInfo);
     RecordReader<NullWritable, OrcStruct> reader = orcInputFormat.getRecordReader(inputSplit, conf, reporter);
-    return new CorcRecordReader(typeInfo, reader, getConverterFactory(conf));
+    return new CorcRecordReader(typeInfo, reader, getConverterFactory(conf), getFilter(conf, typeInfo));
   }
 
   private StructTypeInfo readStructTypeInfoFromSplit(InputSplit inputSplit, JobConf conf) throws IOException {

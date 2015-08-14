@@ -80,6 +80,17 @@ public class Corc implements Writable {
   }
 
   /**
+   * Gets the raw {@link Writable} value for {@code fieldName}
+   *
+   * @throws IOException
+   */
+  public Object getWritable(String fieldName) {
+    Object value = getValueMarshaller(fieldName).getWritableObject(struct);
+    LOG.debug("Fetched writable {}={}", fieldName, value);
+    return value;
+  }
+
+  /**
    * Sets the value for {@code fieldName}, first converting it to the appropriate {@link Writable} type
    *
    * @throws IOException
