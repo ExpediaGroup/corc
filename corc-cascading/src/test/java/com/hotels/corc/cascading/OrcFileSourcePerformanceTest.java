@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
+import org.apache.hadoop.hive.serde2.objectinspector.StandardUnionObjectInspector.StandardUnion;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -108,7 +109,7 @@ public class OrcFileSourcePerformanceTest {
         struct.add(Arrays.asList(i));
         struct.add(createMap(i));
         struct.add(Arrays.asList(i));
-        struct.add(n.toString());
+        struct.add(new StandardUnion((byte) 0, n.toString()));
 
         writer.addRow(struct);
       }
