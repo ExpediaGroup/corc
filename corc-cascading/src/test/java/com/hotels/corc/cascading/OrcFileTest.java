@@ -39,6 +39,7 @@ import org.apache.hadoop.hive.common.type.HiveVarchar;
 import org.apache.hadoop.hive.ql.io.RecordIdentifier;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
+import org.apache.hadoop.hive.serde2.objectinspector.StandardUnionObjectInspector.StandardUnion;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -778,6 +779,40 @@ public class OrcFileTest {
     Data data = new DataBuilder(FIELD_A).addTuple("hello").build();
 
     Plunger.writeData(data).toTap(tap);
+  }
+
+  @Test
+  public void writeUnionString() throws IOException {
+    List<Object> values = new ArrayList<>();
+    values.add("hello");
+    values.add(null);
+
+    write(TypeInfoFactory.getUnionTypeInfo(Arrays.asList((TypeInfo) TypeInfoFactory.stringTypeInfo)), values);
+
+    try (OrcReader reader = getOrcReader()) {
+      assertThat(reader.hasNext(), is(true));
+      assertThat(reader.next().get(0), is((Object) "hello"));
+
+      assertThat(reader.hasNext(), is(true));
+      assertThat(reader.next().get(0), is(nullValue()));
+
+      assertThat(reader.hasNext(), is(false));
+    }
+  }
+
+  @Test
+  public void readUnionString() throws IOException {
+    TypeInfo typeInfo = TypeInfoFactory.getUnionTypeInfo(Arrays.asList((TypeInfo) TypeInfoFactory.stringTypeInfo));
+
+    try (OrcWriter writer = getOrcWriter(typeInfo)) {
+      writer.addRow(new StandardUnion((byte) 0, "hello"));
+      writer.addRow((Object) null);
+    }
+
+    List<Tuple> list = read(typeInfo);
+    assertThat(list.size(), is(2));
+    assertThat(list.get(0).getObject(0), is((Object) "hello"));
+    assertThat(list.get(1).getObject(0), is(nullValue()));
   }
 
 }
