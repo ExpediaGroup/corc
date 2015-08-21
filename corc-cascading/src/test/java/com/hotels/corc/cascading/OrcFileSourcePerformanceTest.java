@@ -15,6 +15,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.Before;
@@ -80,6 +81,7 @@ public class OrcFileSourcePerformanceTest {
         .add("m", TypeInfoFactory.getListTypeInfo(TypeInfoFactory.intTypeInfo))
         .add("n", TypeInfoFactory.getMapTypeInfo(TypeInfoFactory.intTypeInfo, TypeInfoFactory.intTypeInfo))
         .add("o", new StructTypeInfoBuilder().add("a", TypeInfoFactory.intTypeInfo).build())
+        .add("p", TypeInfoFactory.getUnionTypeInfo(Arrays.asList((TypeInfo) TypeInfoFactory.stringTypeInfo)))
         .build();
   }
 
@@ -106,6 +108,7 @@ public class OrcFileSourcePerformanceTest {
         struct.add(Arrays.asList(i));
         struct.add(createMap(i));
         struct.add(Arrays.asList(i));
+        struct.add(n.toString());
 
         writer.addRow(struct);
       }
