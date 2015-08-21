@@ -40,7 +40,6 @@ import org.apache.hadoop.hive.serde2.objectinspector.MapObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.PrimitiveObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.SettableStructObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.StandardUnionObjectInspector.StandardUnion;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.UnionObject;
 import org.apache.hadoop.hive.serde2.objectinspector.UnionObjectInspector;
@@ -422,7 +421,7 @@ public class DefaultConverterFactory implements ConverterFactory {
       for (byte i = 0; i < converters.size(); i++) {
         try {
           Object writable = converters.get(i).toWritableObject(value);
-          return new StandardUnion(i, writable);
+          return OrcUnionFactory.newInstance(i, writable);
         } catch (UnexpectedTypeException e) {
           // try the next one
           continue;

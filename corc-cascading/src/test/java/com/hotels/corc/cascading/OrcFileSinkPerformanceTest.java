@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
+import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.Before;
@@ -79,6 +80,7 @@ public class OrcFileSinkPerformanceTest {
         .add("m", TypeInfoFactory.getListTypeInfo(TypeInfoFactory.intTypeInfo))
         .add("n", TypeInfoFactory.getMapTypeInfo(TypeInfoFactory.intTypeInfo, TypeInfoFactory.intTypeInfo))
         .add("o", new StructTypeInfoBuilder().add("a", TypeInfoFactory.intTypeInfo).build())
+        .add("p", TypeInfoFactory.getUnionTypeInfo(Arrays.asList((TypeInfo) TypeInfoFactory.stringTypeInfo)))
         .build();
   }
 
@@ -104,6 +106,7 @@ public class OrcFileSinkPerformanceTest {
       tuple.add(Arrays.asList(i));
       tuple.add(createMap(i));
       tuple.add(Arrays.asList(i));
+      tuple.add(n.toString());
 
       tuples.add(tuple);
     }
