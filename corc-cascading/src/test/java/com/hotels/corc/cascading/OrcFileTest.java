@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.type.HiveChar;
@@ -744,9 +743,12 @@ public class OrcFileTest {
   public void readDatePredicatePushdown() throws IOException {
     TypeInfo typeInfo = TypeInfoFactory.dateTypeInfo;
 
+    Date date1 = Date.valueOf("1970-01-01");
+    Date date2 = Date.valueOf("1970-01-02");
+
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
-      writer.addRow(new Date(TimeUnit.DAYS.toMillis(0L)));
-      writer.addRow(new Date(TimeUnit.DAYS.toMillis(1L)));
+      writer.addRow(date1);
+      writer.addRow(date2);
     }
 
     StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.dateTypeInfo).build();
@@ -754,7 +756,7 @@ public class OrcFileTest {
     SearchArgument searchArgument = SearchArgumentFactory
         .newBuilder()
         .startAnd()
-        .equals("a", new DateWritable(new Date(TimeUnit.DAYS.toMillis(0L))))
+        .equals("a", new DateWritable(date1))
         .end()
         .build();
 
@@ -764,7 +766,7 @@ public class OrcFileTest {
     List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
 
     assertThat(list.size(), is(1));
-    assertThat(list.get(0).getObject(0), is((Object) new Date(TimeUnit.DAYS.toMillis(0L))));
+    assertThat(((Date) list.get(0).getObject(0)).getTime(), is(date1.getTime()));
   }
 
   @Test

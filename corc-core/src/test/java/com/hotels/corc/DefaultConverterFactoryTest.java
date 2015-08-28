@@ -185,7 +185,9 @@ public class DefaultConverterFactoryTest {
   @Test
   public void dateJava() throws UnexpectedTypeException {
     Converter converter = factory.newConverter(PrimitiveObjectInspectorFactory.javaDateObjectInspector);
-    assertThat(converter.toJavaObject(new DateWritable(new Date(0L))).toString(), is((Object) "1970-01-01"));
+    assertThat(((Date) converter.toJavaObject(new DateWritable(Date.valueOf("1970-01-01")))).getTime(), is(Date
+        .valueOf("1970-01-01")
+        .getTime()));
   }
 
   @Test
