@@ -25,6 +25,7 @@ import org.apache.hadoop.mapred.RecordReader;
 
 import com.hotels.corc.ConverterFactory;
 import com.hotels.corc.Corc;
+import com.hotels.corc.Filter;
 
 /**
  * A wrapper for {@link OrcRecordReader} exposing {@link Corc} in place of {@link OrcStruct}.
@@ -33,13 +34,16 @@ class CorcRecordReader implements RecordReader<NullWritable, Corc> {
   private final StructTypeInfo typeInfo;
   private final RecordReader<NullWritable, OrcStruct> reader;
   private final ConverterFactory factory;
+  private final Filter filter;
   private final AcidRecordReader<NullWritable, OrcStruct> transactionalReader;
   private final boolean transactional;
 
-  CorcRecordReader(StructTypeInfo typeInfo, RecordReader<NullWritable, OrcStruct> reader, ConverterFactory factory) {
+  CorcRecordReader(StructTypeInfo typeInfo, RecordReader<NullWritable, OrcStruct> reader, ConverterFactory factory,
+      Filter filter) {
     this.typeInfo = typeInfo;
     this.reader = reader;
     this.factory = factory;
+    this.filter = filter;
     transactional = AcidRecordReader.class.isAssignableFrom(reader.getClass());
     if (transactional) {
       transactionalReader = (AcidRecordReader<NullWritable, OrcStruct>) reader;
@@ -50,11 +54,15 @@ class CorcRecordReader implements RecordReader<NullWritable, Corc> {
 
   @Override
   public boolean next(NullWritable key, Corc value) throws IOException {
-    boolean read = reader.next(key, value.getOrcStruct());
-    if (transactional && read) {
-      value.setRecordIdentifier(transactionalReader.getRecordIdentifier());
+    while (reader.next(key, value.getOrcStruct())) {
+      if (filter.accept(value)) {
+        if (transactional) {
+          value.setRecordIdentifier(transactionalReader.getRecordIdentifier());
+        }
+        return true;
+      }
     }
-    return read;
+    return false;
   }
 
   @Override

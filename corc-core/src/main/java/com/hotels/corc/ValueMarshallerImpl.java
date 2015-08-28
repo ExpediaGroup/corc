@@ -42,6 +42,11 @@ class ValueMarshallerImpl implements ValueMarshaller {
   }
 
   @Override
+  public Object getWritableObject(OrcStruct struct) {
+    return inspector.getStructFieldData(struct, structField);
+  }
+
+  @Override
   public void setWritableObject(OrcStruct struct, Object javaObject) throws UnexpectedTypeException {
     Object writable;
     try {

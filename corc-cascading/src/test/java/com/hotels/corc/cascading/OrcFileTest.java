@@ -25,12 +25,14 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.type.HiveChar;
@@ -39,6 +41,7 @@ import org.apache.hadoop.hive.common.type.HiveVarchar;
 import org.apache.hadoop.hive.ql.io.RecordIdentifier;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
+import org.apache.hadoop.hive.serde2.io.DateWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.StandardUnionObjectInspector.StandardUnion;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
@@ -715,31 +718,13 @@ public class OrcFileTest {
     assertThat(actual, is(tupleEntryList(expected)));
   }
 
-  public void readStringPredicatePushdownExcludeStripe() throws IOException {
-    TypeInfo typeInfo = TypeInfoFactory.stringTypeInfo;
-
-    try (OrcWriter writer = getOrcWriter(typeInfo)) {
-      writer.addRow("hello");
-    }
-
-    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
-
-    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "world").end().build();
-
-    OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
-    Tap<?, ?, ?> tap = new Hfs(orcFile, path);
-
-    List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
-
-    assertThat(list.size(), is(0));
-  }
-
   @Test
-  public void readStringPredicatePushdownIncludeStripe() throws IOException {
+  public void readStringPredicatePushdown() throws IOException {
     TypeInfo typeInfo = TypeInfoFactory.stringTypeInfo;
 
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
       writer.addRow("hello");
+      writer.addRow("world");
     }
 
     StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
@@ -753,6 +738,87 @@ public class OrcFileTest {
 
     assertThat(list.size(), is(1));
     assertThat(list.get(0).getObject(0), is((Object) "hello"));
+  }
+
+  @Test
+  public void readDatePredicatePushdown() throws IOException {
+    TypeInfo typeInfo = TypeInfoFactory.dateTypeInfo;
+
+    try (OrcWriter writer = getOrcWriter(typeInfo)) {
+      writer.addRow(new Date(TimeUnit.DAYS.toMillis(0L)));
+      writer.addRow(new Date(TimeUnit.DAYS.toMillis(1L)));
+    }
+
+    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.dateTypeInfo).build();
+
+    SearchArgument searchArgument = SearchArgumentFactory
+        .newBuilder()
+        .startAnd()
+        .equals("a", new DateWritable(new Date(TimeUnit.DAYS.toMillis(0L))))
+        .end()
+        .build();
+
+    OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
+    Tap<?, ?, ?> tap = new Hfs(orcFile, path);
+
+    List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
+
+    assertThat(list.size(), is(1));
+    assertThat(list.get(0).getObject(0), is((Object) new Date(TimeUnit.DAYS.toMillis(0L))));
+  }
+
+  @Test
+  public void readDecimalPredicatePushdown() throws IOException {
+    TypeInfo typeInfo = TypeInfoFactory.getDecimalTypeInfo(2, 1);
+
+    try (OrcWriter writer = getOrcWriter(typeInfo)) {
+      writer.addRow(HiveDecimal.create("0.0"));
+      writer.addRow(HiveDecimal.create("0.1"));
+    }
+
+    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", typeInfo).build();
+
+    SearchArgument searchArgument = SearchArgumentFactory
+        .newBuilder()
+        .startAnd()
+        .equals("a", new BigDecimal("0.1"))
+        .end()
+        .build();
+
+    OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
+    Tap<?, ?, ?> tap = new Hfs(orcFile, path);
+
+    List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
+
+    assertThat(list.size(), is(1));
+    assertThat(list.get(0).getObject(0), is((Object) new BigDecimal("0.1")));
+  }
+
+  @Test
+  public void readCharPredicatePushdown() throws IOException {
+    TypeInfo typeInfo = TypeInfoFactory.getCharTypeInfo(3);
+
+    try (OrcWriter writer = getOrcWriter(typeInfo)) {
+      writer.addRow(new HiveChar("foo", 3));
+      writer.addRow(new HiveChar("bar", 3));
+    }
+
+    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", typeInfo).build();
+
+    SearchArgument searchArgument = SearchArgumentFactory
+        .newBuilder()
+        .startAnd()
+        .equals("a", new HiveChar("foo", 5))
+        .end()
+        .build();
+
+    OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
+    Tap<?, ?, ?> tap = new Hfs(orcFile, path);
+
+    List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
+
+    assertThat(list.size(), is(1));
+    assertThat(list.get(0).getObject(0), is((Object) "foo"));
   }
 
   @Test(expected = TupleException.class)
