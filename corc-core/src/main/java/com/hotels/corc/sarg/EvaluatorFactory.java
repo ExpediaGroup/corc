@@ -52,8 +52,7 @@ class EvaluatorFactory {
   }
 
   Evaluator<?> newInstance(PredicateLeaf predicateLeaf) {
-    String fieldName = predicateLeaf.getColumnName();
-    TypeInfo typeInfo = structTypeInfo.getStructFieldTypeInfo(fieldName);
+    TypeInfo typeInfo = structTypeInfo.getStructFieldTypeInfo(predicateLeaf.getColumnName());
     if (typeInfo.getCategory() != Category.PRIMITIVE) {
       throw new IllegalArgumentException("Unsupported column type: " + typeInfo.getCategory());
     }
@@ -74,7 +73,7 @@ class EvaluatorFactory {
     case BETWEEN:
       return betweenEvaluator(predicateLeaf, category);
     case IS_NULL:
-      return new IsNullEvaluator<>(fieldName);
+      return isNullEvaluator(predicateLeaf);
     default:
       throw new IllegalArgumentException("Unsupported operator: " + predicateLeaf.getOperator());
     }
@@ -107,6 +106,11 @@ class EvaluatorFactory {
     Comparable<?> minLiteral = toComparable(category, literalList.get(0));
     Comparable<?> maxLiteral = toComparable(category, literalList.get(1));
     return new BetweenEvaluator(predicateLeaf.getColumnName(), minLiteral, maxLiteral);
+  }
+
+  @SuppressWarnings("rawtypes")
+  private Evaluator<?> isNullEvaluator(PredicateLeaf predicateLeaf) {
+    return new IsNullEvaluator(predicateLeaf.getColumnName());
   }
 
   static Comparable<?> toComparable(PrimitiveCategory category, Object literal) {

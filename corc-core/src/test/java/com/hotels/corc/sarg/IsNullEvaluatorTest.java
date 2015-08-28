@@ -38,7 +38,8 @@ public class IsNullEvaluatorTest {
   @Mock
   private Corc corc;
 
-  private final Evaluator<?> evaluator = new IsNullEvaluator<>(COL0);
+  @SuppressWarnings("rawtypes")
+  private final Evaluator<?> evaluator = new IsNullEvaluator(COL0);
 
   @Test
   public void stringIsNotNull() {
