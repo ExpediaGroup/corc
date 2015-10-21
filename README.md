@@ -15,7 +15,7 @@ You can obtain **corc** from Maven Central :
 
 Corc has been built and tested against Cascading 3.0.2.
 
-There is a known issue in 3.0.0 (fixed in 3.0.2) when writing small ORC files with Cascading and Tez  (ie with only one stripe of data). At the point of committing the output, the writer has not flushed or closed so the ORC file is not materialized on disk.
+There is a known issue in 3.0.0 (fixed in 3.0.2) when writing small ORC files with Cascading and Tez (i.e. with only one stripe of data). At the point of committing the output, the writer has not flushed or closed so the ORC file is not materialized on disk.
 
 ##Hive Dependencies
 

@@ -139,8 +139,7 @@ public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector
   }
 
   /**
-   * Sets the {@link InputFormat} to {@link CorcInputFormat} and stores the {@link StructTypeInfo} in the {@link ?
-   * extends Configuration}.
+   * Sets the {@link InputFormat} to {@link CorcInputFormat} and stores the {@link StructTypeInfo} in the {@link Configuration}.
    */
   @Override
   public void sourceConfInit(FlowProcess<? extends Configuration> flowProcess,
