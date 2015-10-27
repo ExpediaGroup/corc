@@ -57,10 +57,10 @@ public class OrcFileSourcePerformanceTest {
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Mock
-  private FlowProcess<JobConf> flowProcess;
+  private FlowProcess<Configuration> flowProcess;
 
   private StructTypeInfo structTypeInfo;
-  private Tap<JobConf, ?, ?> tap;
+  private Tap<Configuration, ?, ?> tap;
 
   @Before
   public void before() throws IOException {
@@ -137,7 +137,7 @@ public class OrcFileSourcePerformanceTest {
     return map;
   }
 
-  private Tap<JobConf, ?, ?> createTap() throws IOException {
+  private Tap<Configuration, ?, ?> createTap() throws IOException {
     OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().build();
     return new Hfs(orcFile, temporaryFolder.getRoot().getCanonicalPath());
   }

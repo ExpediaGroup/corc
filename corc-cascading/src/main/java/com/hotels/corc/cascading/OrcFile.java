@@ -20,6 +20,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.io.RecordIdentifier;
 import org.apache.hadoop.hive.ql.io.orc.OrcStruct;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
@@ -30,8 +31,8 @@ import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoUtils;
 import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.InputFormat;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
@@ -71,7 +72,7 @@ import com.hotels.corc.mapred.CorcOutputFormat;
  * amount of required read IO and improve performance.
  */
 @SuppressWarnings("rawtypes")
-public class OrcFile extends Scheme<JobConf, RecordReader, OutputCollector, Corc, Corc> {
+public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector, Corc, Corc> {
 
   /**
    * Returns an object to assist with building an {@link OrcFile} source.
@@ -138,13 +139,13 @@ public class OrcFile extends Scheme<JobConf, RecordReader, OutputCollector, Corc
   }
 
   /**
-   * Sets the {@link InputFormat} to {@link CorcInputFormat} and stores the {@link StructTypeInfo} in the
-   * {@link JobConf}.
+   * Sets the {@link InputFormat} to {@link CorcInputFormat} and stores the {@link StructTypeInfo} in the {@link Configuration}.
    */
   @Override
-  public void sourceConfInit(FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap,
-      JobConf conf) {
-    conf.setInputFormat(CorcInputFormat.class);
+  public void sourceConfInit(FlowProcess<? extends Configuration> flowProcess,
+      Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf) {
+    conf.setBoolean("mapred.mapper.new-api", false);
+    conf.setClass("mapred.input.format.class", CorcInputFormat.class, InputFormat.class);
     CorcInputFormat.setSchemaTypeInfo(conf, schemaTypeInfo);
     CorcInputFormat.setTypeInfo(conf, typeInfo);
     CorcInputFormat.setSearchArgumentKryo(conf, searchArgumentKryo);
@@ -155,7 +156,7 @@ public class OrcFile extends Scheme<JobConf, RecordReader, OutputCollector, Corc
    * Creates an {@link Corc} instance and stores it in the context to be reused for all rows.
    */
   @Override
-  public void sourcePrepare(FlowProcess<JobConf> flowProcess, SourceCall<Corc, RecordReader> sourceCall)
+  public void sourcePrepare(FlowProcess<? extends Configuration> flowProcess, SourceCall<Corc, RecordReader> sourceCall)
       throws IOException {
     sourceCall.setContext((Corc) sourceCall.getInput().createValue());
   }
@@ -165,7 +166,8 @@ public class OrcFile extends Scheme<JobConf, RecordReader, OutputCollector, Corc
    * incoming {@link TupleEntry}.
    */
   @Override
-  public boolean source(FlowProcess<JobConf> flowProcess, SourceCall<Corc, RecordReader> sourceCall) throws IOException {
+  public boolean source(FlowProcess<? extends Configuration> flowProcess, SourceCall<Corc, RecordReader> sourceCall)
+      throws IOException {
     Corc corc = sourceCall.getContext();
     @SuppressWarnings("unchecked")
     boolean next = sourceCall.getInput().next(NullWritable.get(), corc);
@@ -188,18 +190,19 @@ public class OrcFile extends Scheme<JobConf, RecordReader, OutputCollector, Corc
    * {@link Corc} respectively.
    */
   @Override
-  public void sinkConfInit(FlowProcess<JobConf> flowProcess, Tap<JobConf, RecordReader, OutputCollector> tap,
-      JobConf conf) {
-    conf.setOutputFormat(CorcOutputFormat.class);
-    conf.setOutputKeyClass(NullWritable.class);
-    conf.setOutputValueClass(Corc.class);
+  public void sinkConfInit(FlowProcess<? extends Configuration> flowProcess,
+      Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf) {
+    conf.setBoolean("mapred.mapper.new-api", false);
+    conf.setClass("mapred.output.format.class", CorcOutputFormat.class, OutputFormat.class);
+    conf.setClass("mapreduce.job.output.key.class", NullWritable.class, Writable.class);
+    conf.setClass("mapreduce.job.output.value.class", Corc.class, Writable.class);
   }
 
   /**
    * Creates an {@link Corc} instance and stores it in the context to be reused for all rows.
    */
   @Override
-  public void sinkPrepare(FlowProcess<JobConf> flowProcess, SinkCall<Corc, OutputCollector> sinkCall)
+  public void sinkPrepare(FlowProcess<? extends Configuration> flowProcess, SinkCall<Corc, OutputCollector> sinkCall)
       throws IOException {
     sinkCall.setContext(new Corc(typeInfo, converterFactory));
   }
@@ -209,7 +212,8 @@ public class OrcFile extends Scheme<JobConf, RecordReader, OutputCollector, Corc
    */
   @SuppressWarnings("unchecked")
   @Override
-  public void sink(FlowProcess<JobConf> flowProcess, SinkCall<Corc, OutputCollector> sinkCall) throws IOException {
+  public void sink(FlowProcess<? extends Configuration> flowProcess, SinkCall<Corc, OutputCollector> sinkCall)
+      throws IOException {
     Corc corc = sinkCall.getContext();
     TupleEntry tupleEntry = sinkCall.getOutgoingEntry();
     for (Comparable<?> fieldName : tupleEntry.getFields()) {
