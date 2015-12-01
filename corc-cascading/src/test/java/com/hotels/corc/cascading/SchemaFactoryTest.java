@@ -18,6 +18,7 @@ package com.hotels.corc.cascading;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -44,10 +45,8 @@ public class SchemaFactoryTest {
         .add("e", TypeInfoFactory.getDecimalTypeInfo(1, 0))
         .add("f", TypeInfoFactory.getListTypeInfo(TypeInfoFactory.stringTypeInfo))
         .add("g", TypeInfoFactory.getMapTypeInfo(TypeInfoFactory.stringTypeInfo, TypeInfoFactory.stringTypeInfo))
-        .add(
-            "h",
-            TypeInfoFactory.getUnionTypeInfo(Arrays.asList((TypeInfo) TypeInfoFactory.stringTypeInfo,
-                TypeInfoFactory.intTypeInfo)))
+        .add("h", TypeInfoFactory
+            .getUnionTypeInfo(Arrays.asList((TypeInfo) TypeInfoFactory.stringTypeInfo, TypeInfoFactory.intTypeInfo)))
         .add("i", new StructTypeInfoBuilder().add("x", TypeInfoFactory.stringTypeInfo).build())
         .build();
 
@@ -68,8 +67,8 @@ public class SchemaFactoryTest {
   @Test
   public void createStructTypeInfo() {
     String[] names = new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k" };
-    Class<?>[] types = new Class<?>[] { String.class, Boolean.class, Byte.class, Short.class, Integer.class,
-        Long.class, Float.class, Double.class, Timestamp.class, Date.class, byte[].class };
+    Class<?>[] types = new Class<?>[] { String.class, Boolean.class, Byte.class, Short.class, Integer.class, Long.class,
+        Float.class, Double.class, Timestamp.class, Date.class, byte[].class };
 
     Fields fields = new Fields(names, types);
 
@@ -96,5 +95,12 @@ public class SchemaFactoryTest {
     Fields fields = new Fields(names, types);
 
     SchemaFactory.newStructTypeInfo(fields);
+  }
+
+  @Test
+  public void bigDecimalField() throws Exception {
+    Fields bigDecimalField = new Fields("bigD", BigDecimal.class);
+    StructTypeInfo typeInfo = SchemaFactory.newStructTypeInfo(bigDecimalField);
+    assertThat(typeInfo.getStructFieldTypeInfo("bigD"), is((TypeInfo) TypeInfoFactory.decimalTypeInfo));
   }
 }

@@ -17,6 +17,7 @@ package com.hotels.corc.cascading;
 
 import static com.hotels.corc.cascading.OrcFile.ROW_ID_NAME;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -92,11 +93,22 @@ final class SchemaFactory {
       if (type == null) {
         throw new IllegalArgumentException("Missing type information for field: " + name);
       }
-      TypeInfo typeInfo = TypeInfoFactory.getPrimitiveTypeInfoFromJavaPrimitive(type);
+
+      TypeInfo typeInfo = getTypeInfoFromClass(type);
       typeInfos.add(typeInfo);
     }
 
     return (StructTypeInfo) TypeInfoFactory.getStructTypeInfo(names, typeInfos);
+  }
+
+  private static TypeInfo getTypeInfoFromClass(Class<?> type) {
+    TypeInfo typeInfo = null;
+    if (BigDecimal.class.equals(type)) {
+      typeInfo = TypeInfoFactory.decimalTypeInfo;
+    } else {
+      typeInfo = TypeInfoFactory.getPrimitiveTypeInfoFromJavaPrimitive(type);
+    }
+    return typeInfo;
   }
 
 }
