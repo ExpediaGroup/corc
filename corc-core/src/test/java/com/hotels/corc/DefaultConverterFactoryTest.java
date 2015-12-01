@@ -69,6 +69,12 @@ public class DefaultConverterFactoryTest {
   }
 
   @Test
+  public void stringToStringJava() throws UnexpectedTypeException {
+    Converter converter = factory.newConverter(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
+    assertThat(converter.toJavaObject(new Double(2.0)), is((Object) "2.0"));
+  }
+
+  @Test
   public void stringWritable() throws UnexpectedTypeException {
     Converter converter = factory.newConverter(PrimitiveObjectInspectorFactory.javaStringObjectInspector);
     assertThat(converter.toWritableObject("x"), is((Object) new Text("x")));
@@ -185,9 +191,8 @@ public class DefaultConverterFactoryTest {
   @Test
   public void dateJava() throws UnexpectedTypeException {
     Converter converter = factory.newConverter(PrimitiveObjectInspectorFactory.javaDateObjectInspector);
-    assertThat(((Date) converter.toJavaObject(new DateWritable(Date.valueOf("1970-01-01")))).getTime(), is(Date
-        .valueOf("1970-01-01")
-        .getTime()));
+    assertThat(((Date) converter.toJavaObject(new DateWritable(Date.valueOf("1970-01-01")))).getTime(),
+        is(Date.valueOf("1970-01-01").getTime()));
   }
 
   @Test
@@ -238,8 +243,8 @@ public class DefaultConverterFactoryTest {
   @Test
   public void varcharWritable() throws UnexpectedTypeException {
     Converter converter = getConverter(TypeInfoFactory.getVarcharTypeInfo(1));
-    assertThat(converter.toWritableObject(new HiveVarchar("a", -1)), is((Object) new HiveVarcharWritable(
-        new HiveVarchar("a", -1))));
+    assertThat(converter.toWritableObject(new HiveVarchar("a", -1)),
+        is((Object) new HiveVarcharWritable(new HiveVarchar("a", -1))));
   }
 
   @Test
@@ -356,14 +361,14 @@ public class DefaultConverterFactoryTest {
 
     SettableStructObjectInspector inspector = (SettableStructObjectInspector) OrcStruct.createObjectInspector(typeInfo);
     Object struct = inspector.create();
-    inspector.setStructFieldData(struct, inspector.getStructFieldRef("char1"), new HiveCharWritable(new HiveChar("a",
-        -1)));
+    inspector.setStructFieldData(struct, inspector.getStructFieldRef("char1"),
+        new HiveCharWritable(new HiveChar("a", -1)));
 
     SettableStructObjectInspector nestedInspector = (SettableStructObjectInspector) OrcStruct
         .createObjectInspector(nested);
     Object nestedStruct = inspector.create();
-    nestedInspector.setStructFieldData(nestedStruct, nestedInspector.getStructFieldRef("char1"), new HiveCharWritable(
-        new HiveChar("b", -1)));
+    nestedInspector.setStructFieldData(nestedStruct, nestedInspector.getStructFieldRef("char1"),
+        new HiveCharWritable(new HiveChar("b", -1)));
     inspector.setStructFieldData(struct, inspector.getStructFieldRef("struct_char1"), nestedStruct);
 
     List<Object> list = new ArrayList<>();
