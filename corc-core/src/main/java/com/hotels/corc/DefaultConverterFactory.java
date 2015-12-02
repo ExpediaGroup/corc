@@ -88,8 +88,8 @@ public class DefaultConverterFactory implements ConverterFactory {
       case DECIMAL:
         return new DecimalConverter();
       default:
-        throw new IllegalArgumentException("Unknown Primitive Category: "
-            + ((PrimitiveObjectInspector) inspector).getPrimitiveCategory());
+        throw new IllegalArgumentException(
+            "Unknown Primitive Category: " + ((PrimitiveObjectInspector) inspector).getPrimitiveCategory());
       }
     case STRUCT:
       return new StructConverter(this, (SettableStructObjectInspector) inspector);
@@ -113,7 +113,7 @@ public class DefaultConverterFactory implements ConverterFactory {
 
     @Override
     protected Object toJavaObjectInternal(Object value) throws UnexpectedTypeException {
-      return ((Text) value).toString();
+      return value.toString();
     }
 
   }
