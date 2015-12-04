@@ -168,6 +168,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
    */
   static void setReadColumns(Configuration conf, StructTypeInfo actualStructTypeInfo) {
     StructTypeInfo readStructTypeInfo = getTypeInfo(conf);
+    LOG.info("Read StructTypeInfo: {}", readStructTypeInfo);
 
     List<Integer> ids = new ArrayList<>();
     List<String> names = new ArrayList<>();
@@ -189,8 +190,11 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
         ids.add(i);
         names.add(actualName);
       }
-      LOG.debug("Set column projection on columns: {} ({})", ids, readNames);
     }
+    if (ids.size() == 0) {
+      throw new IllegalStateException("None of the selected columns were found in the ORC file.");
+    }
+    LOG.info("Set column projection on columns: {} ({})", ids, names);
     ColumnProjectionUtils.appendReadColumns(conf, ids, names);
   }
 
@@ -215,8 +219,10 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
   public RecordReader<NullWritable, Corc> getRecordReader(InputSplit inputSplit, JobConf conf, Reporter reporter)
       throws IOException {
     StructTypeInfo typeInfo = getSchemaTypeInfo(conf);
+    LOG.info("Conf StructTypeInfo: {}", typeInfo);
     if (typeInfo == null) {
       typeInfo = readStructTypeInfoFromSplit(inputSplit, conf);
+      LOG.info("File StructTypeInfo: {}", typeInfo);
     }
     setReadColumns(conf, typeInfo);
     RecordReader<NullWritable, OrcStruct> reader = orcInputFormat.getRecordReader(inputSplit, conf, reporter);

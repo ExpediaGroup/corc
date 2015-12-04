@@ -266,6 +266,18 @@ public class CorcInputFormatTest {
   }
 
   @Test(expected = IllegalStateException.class)
+  public void setInputReadColumnsAllMissing() {
+    StructTypeInfo typeInfo = new StructTypeInfoBuilder()
+        .add("a", TypeInfoFactory.stringTypeInfo)
+        .add("b", TypeInfoFactory.longTypeInfo)
+        .build();
+
+    conf.set(CorcInputFormat.INPUT_TYPE_INFO, "struct<_col0:string,_col1:bigint>");
+
+    CorcInputFormat.setReadColumns(conf, typeInfo);
+  }
+
+  @Test(expected = IllegalStateException.class)
   public void setInputReadColumnsDifferentTypes() {
     StructTypeInfo typeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
 
