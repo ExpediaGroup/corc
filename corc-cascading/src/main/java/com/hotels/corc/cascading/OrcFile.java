@@ -146,6 +146,8 @@ public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector
       Tap<Configuration, RecordReader, OutputCollector> tap, Configuration conf) {
     conf.setBoolean("mapred.mapper.new-api", false);
     conf.setClass("mapred.input.format.class", CorcInputFormat.class, InputFormat.class);
+    // ORC cannot be combined.
+    conf.setBoolean("cascading.hadoop.hfs.combine.files", false);
     CorcInputFormat.setSchemaTypeInfo(conf, schemaTypeInfo);
     CorcInputFormat.setTypeInfo(conf, typeInfo);
     CorcInputFormat.setSearchArgumentKryo(conf, searchArgumentKryo);
