@@ -6,18 +6,18 @@
 
 Use corc to read and write data in the [Optimized Row Columnar (ORC)](http://orc.apache.org/) file format in your Cascading applications. The reading of [ACID](http://orc.apache.org/docs/acid.html) datasets is also supported.
 
-#Start using
+# Start using
 You can obtain **corc** from Maven Central : 
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading/badge.svg?subject=com.hotels:corc-cascading)](https://maven-badges.herokuapp.com/maven-central/com.hotels/corc-cascading) ![GitHub license](https://img.shields.io/github/license/HotelsDotCom/corc.svg)
 
-##Cascading Dependencies
+## Cascading Dependencies
 
 Corc has been built and tested against Cascading 3.0.2.
 
 There is a known issue in 3.0.0 (fixed in 3.0.2) when writing small ORC files with Cascading and Tez (i.e. with only one stripe of data). At the point of committing the output, the writer has not flushed or closed so the ORC file is not materialized on disk.
 
-##Hive Dependencies
+## Hive Dependencies
 
 Corc is built with Hive 1.0.0. Several dependencies will need to be included when using Corc:
 
@@ -43,8 +43,8 @@ Corc is built with Hive 1.0.0. Several dependencies will need to be included whe
       <version>2.5.0</version>
     </dependency>
 
-#Overview
-##[Supported types](http://orc.apache.org/docs/types.html)
+# Overview
+## [Supported types](http://orc.apache.org/docs/types.html)
 
 <table>
   <tr><th>Hive</th><th>Cascading/Java</th></tr>
@@ -69,11 +69,11 @@ Corc is built with Hive 1.0.0. Several dependencies will need to be included whe
 </table>
 
 
-##Constructing an `OrcFile` instance
+## Constructing an `OrcFile` instance
 
 `OrcFile` provides two public constructors; one for sourcing and one for sinking. However, these are provided to be more flexible for others who may wish to extend the class. It is advised to construct an instance via the `SourceBuilder` and `SinkBuilder` classes.
 
-###SourceBuilder
+### SourceBuilder
 
 Create a builder:
 
@@ -135,7 +135,7 @@ Finally, build the `OrcFile`:
 
     OrcFile orcFile = builder.build();
 
-###SinkBuilder
+### SinkBuilder
 
     OrcFile orcFile = OrcFile.sink()
         .schema(schema)
@@ -168,24 +168,25 @@ or, via the convenience builder...
         .add("col1", TypeInfoFactory.longTypeInfo)
         .build();
 
-##Reading transactional Hive tables
+## Reading transactional Hive tables
 Corc also supports the reading of [ACID datasets](http://orc.apache.org/docs/acid.html) that underpin [transactional Hive tables](https://cwiki.apache.org/confluence/display/Hive/Hive+Transactions). However, for this to work effectively with an active Hive table you must provide your own lock management. We intend to make this functionality available in the [cascading-hive](https://github.com/HotelsDotCom/cascading-hive/tree/acid) project. When reading the data you may optionally include the virtual `RecordIdentifer` column, also known as the `ROW__ID` column, with one of the following approaches:
 
 1. Add a field named '`ROW__ID`' to your `Fields` definition. This must be of type `org.apache.hadoop.hive.ql.io.RecordIdentifier`. For convenience you can use the constant `OrcFile#ROW__ID` with some fields arithmetic: `Fields myFields = Fields.join(OrcFile.ROW__ID, myFields);`.
 2. Use the `OrcFile.source().prependRowId()` option. Be sure to exclude the `RecordIdentifer` column from your `typeInfo` instance. The `ROW__ID` field will be added to your tuple stream automatically.
 
-##Usage
+## Usage
 `OrcFile` can be used with `Hfs`, just like `TextDelimited`.
 
     OrcFile orcFile = ...
     String path = ...
     Hfs hfs = new Hfs(orcFile, path);
 
-#Credits
+# Credits
 
 Created by [Dave Maughan](https://github.com/nahguam) & [Elliot West](https://github.com/teabot), with thanks to: [Patrick Duin](https://github.com/patduin), [James Grant](https://github.com/noddy76) & [Adrian Woodhead](https://github.com/massdosage).
 
-#Legal
+# Legal
 This project is available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-Copyright 2015-2016 Expedia Inc.
+Copyright 2015-2017 Expedia Inc.
+
