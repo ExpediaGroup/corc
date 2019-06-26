@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
@@ -65,350 +66,350 @@ public class SearchArgumentFilterTest {
   @Test
   public void equalsIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().equals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startAnd().equals(COL0, PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void equalsIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().equals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().equals(COL0, PredicateLeaf.Type.LONG,ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void equalsNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startAnd().equals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startAnd().equals(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notEqualsIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().equals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().equals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notEqualsIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().equals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startNot().equals(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notEqualsNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startNot().equals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startNot().equals(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void nullSafeEqualsIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().nullSafeEquals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startAnd().nullSafeEquals(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void nullSafeEqualsIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().nullSafeEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().nullSafeEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void nullSafeEqualsNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startAnd().nullSafeEquals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startAnd().nullSafeEquals(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notNullSafeEqualsIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().nullSafeEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().nullSafeEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notNullSafeEqualsIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().nullSafeEquals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startNot().nullSafeEquals(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notNullSafeEqualsNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startNot().nullSafeEquals(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startNot().nullSafeEquals(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void isNullIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startAnd().isNull(COL0).end().build();
+    SearchArgument searchArgument = builder.startAnd().isNull(COL0,PredicateLeaf.Type.LONG).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void isNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().isNull(COL0).end().build();
+    SearchArgument searchArgument = builder.startAnd().isNull(COL0,PredicateLeaf.Type.LONG).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notIsNullIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().isNull(COL0).end().build();
+    SearchArgument searchArgument = builder.startNot().isNull(COL0,PredicateLeaf.Type.LONG).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notIsNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startNot().isNull(COL0).end().build();
+    SearchArgument searchArgument = builder.startNot().isNull(COL0,PredicateLeaf.Type.LONG).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void inIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().in(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startAnd().in(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void inIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().in(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().in(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void inNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startAnd().in(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startAnd().in(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notInIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().in(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().in(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notInIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().in(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startNot().in(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notInNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startNot().in(COL0, ZERO).end().build();
+    SearchArgument searchArgument = builder.startNot().in(COL0,PredicateLeaf.Type.LONG, ZERO).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void betweenLessThanIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startAnd().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void betweenMinIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startAnd().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void betweenMiddleIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(TWO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startAnd().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void betweenMaxIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(THREE_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startAnd().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void betweenGreaterThanIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(FOUR_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startAnd().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void betweenNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startAnd().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startAnd().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notBetweenLessThanIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startNot().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notBetweenMinIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startNot().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notBetweenMiddleIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(TWO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startNot().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notBetweenMaxIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(THREE_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startNot().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notBetweenGreaterThanIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(FOUR_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startNot().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notBetweenNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startNot().between(COL0, ONE, THREE).end().build();
+    SearchArgument searchArgument = builder.startNot().between(COL0,PredicateLeaf.Type.LONG, ONE, THREE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void lessThanIsLessThanIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThan(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void lessThanIsEqualIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThan(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void lessThanIsGreaterThanIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(TWO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThan(COL0, PredicateLeaf.Type.LONG,ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void lessThanNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startAnd().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThan(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notLessThanIsLessThanIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThan(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notLessThanIsEqualIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThan(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notLessThanIsGreaterThanIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(TWO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThan(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notLessThanNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startNot().lessThan(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThan(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void lessThanEqualsIsLessThanIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void lessThanEqualsIsEqualIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void lessThanEqualsIsGreaterThanIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(TWO_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void lessThanEqualsNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notLessThanEqualsIsLessThanIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notLessThanEqualsIsEqualIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
   @Test
   public void notLessThanEqualsIsGreaterThanIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(TWO_WRITABLE);
-    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
   @Test
   public void notLessThanEqualsNullIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(null);
-    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0, ONE).end().build();
+    SearchArgument searchArgument = builder.startNot().lessThanEquals(COL0,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
@@ -416,7 +417,7 @@ public class SearchArgumentFilterTest {
   public void orEqualsIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
     when(corc.getWritable(COL1)).thenReturn(ZERO_WRITABLE);
-    SearchArgument searchArgument = builder.startOr().equals(COL0, ONE).equals(COL1, ONE).end().build();
+    SearchArgument searchArgument = builder.startOr().equals(COL0,PredicateLeaf.Type.LONG, ONE).equals(COL1,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
@@ -424,7 +425,7 @@ public class SearchArgumentFilterTest {
   public void orEqualsIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
     when(corc.getWritable(COL1)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startOr().equals(COL0, ONE).equals(COL1, ONE).end().build();
+    SearchArgument searchArgument = builder.startOr().equals(COL0,PredicateLeaf.Type.LONG, ONE).equals(COL1,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
@@ -432,7 +433,7 @@ public class SearchArgumentFilterTest {
   public void andEqualsIsFalse() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ZERO_WRITABLE);
     when(corc.getWritable(COL1)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().equals(COL0, ONE).equals(COL1, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().equals(COL0,PredicateLeaf.Type.LONG, ONE).equals(COL1,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(false));
   }
 
@@ -440,7 +441,7 @@ public class SearchArgumentFilterTest {
   public void andEqualsIsTrue() throws IOException {
     when(corc.getWritable(COL0)).thenReturn(ONE_WRITABLE);
     when(corc.getWritable(COL1)).thenReturn(ONE_WRITABLE);
-    SearchArgument searchArgument = builder.startAnd().equals(COL0, ONE).equals(COL1, ONE).end().build();
+    SearchArgument searchArgument = builder.startAnd().equals(COL0,PredicateLeaf.Type.LONG, ONE).equals(COL1,PredicateLeaf.Type.LONG, ONE).end().build();
     assertThat(new SearchArgumentFilter(searchArgument, structTypeInfo).accept(corc), is(true));
   }
 
@@ -455,13 +456,13 @@ public class SearchArgumentFilterTest {
     SearchArgument searchArgument = builder
         .startAnd()
         .startNot()
-        .isNull(COL0)
+        .isNull(COL0, PredicateLeaf.Type.LONG)
         .end()
         .startNot()
-        .lessThanEquals(COL0, ZERO)
+        .lessThanEquals(COL0,PredicateLeaf.Type.LONG, ZERO)
         .end()
         .startNot()
-        .between(COL1, ONE, THREE)
+        .between(COL1,PredicateLeaf.Type.LONG, ONE, THREE)
         .end()
         .end()
         .build();
@@ -479,13 +480,13 @@ public class SearchArgumentFilterTest {
     SearchArgument searchArgument = builder
         .startAnd()
         .startNot()
-        .isNull(COL0)
+        .isNull(COL0, PredicateLeaf.Type.LONG)
         .end()
         .startNot()
-        .lessThanEquals(COL0, ZERO)
+        .lessThanEquals(COL0, PredicateLeaf.Type.LONG, ZERO)
         .end()
         .startNot()
-        .between(COL1, ONE, THREE)
+        .between(COL1,PredicateLeaf.Type.LONG, ONE, THREE)
         .end()
         .end()
         .build();

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Output;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.io.AcidInputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcFile;
 import org.apache.hadoop.hive.ql.io.orc.OrcInputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcRecordUpdater;
@@ -45,6 +48,11 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.hadoop.hive.ql.io.sarg.ConvertAstToSearchArg;
+
+
 
 import com.hotels.corc.ConverterFactory;
 import com.hotels.corc.Corc;
@@ -142,7 +150,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
    */
   public static void setSearchArgument(Configuration conf, SearchArgument searchArgument) {
     if (searchArgument != null) {
-      setSearchArgumentKryo(conf, searchArgument.toKryo());
+      setSearchArgumentKryo(conf, toKryo(searchArgument));
     }
   }
 
@@ -160,7 +168,8 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
     if (searchArgumentKryo == null) {
       return null;
     }
-    return SearchArgumentFactory.create(searchArgumentKryo);
+    //SearchArgument test = new SearchArgumentFactory.newBuilder()
+    return ConvertAstToSearchArg.create(searchArgumentKryo);
   }
 
   /**
@@ -195,7 +204,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
       throw new IllegalStateException("None of the selected columns were found in the ORC file.");
     }
     LOG.info("Set column projection on columns: {} ({})", ids, names);
-    ColumnProjectionUtils.appendReadColumns(conf, ids, names);
+    ColumnProjectionUtils.appendReadColumns(conf, ids); //Got rid of names? Don't know how this affects things
   }
 
   private final OrcInputFormat orcInputFormat = new OrcInputFormat();
@@ -258,7 +267,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
     Path path = inputSplit.getPath();
     if (inputSplit instanceof OrcSplit) {
       OrcSplit orcSplit = (OrcSplit) inputSplit;
-      List<Long> deltas = orcSplit.getDeltas();
+      List<AcidInputFormat.DeltaMetaData> deltas = orcSplit.getDeltas();
       if (!orcSplit.hasBase() && deltas.size() >= 2) {
         throw new IOException("Cannot read valid StructTypeInfo from delta only file: " + path);
       }
@@ -301,6 +310,13 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
       throw new RuntimeException("Could not obtain OrcRecordUpdater.ROW value.", e);
     }
 
+  }
+
+  public static String toKryo(SearchArgument sarg) {
+    Output out = new Output(4 * 1024, 10 * 1024 * 1024);
+    new Kryo().writeObject(out, sarg);
+    out.close();
+    return Base64.encodeBase64String(out.toBytes());
   }
 
 }
