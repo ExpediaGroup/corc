@@ -15,9 +15,12 @@
  */
 package com.hotels.corc.cascading;
 
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 
 import cascading.tuple.Fields;
+
+import java.lang.reflect.Type;
 
 /**
  * A {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory} that uses {@link Fields}. Extracts the column name
@@ -50,11 +53,11 @@ public final class SearchArgumentFactory {
       this.internalBuilder = internalBuilder;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#between(String, Object, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//between(String, Object, Object)}. */
     public Builder between(Fields fields, Object lower, Object upper) {
       checkFields(fields);
       checkValueTypes(fields, lower, upper);
-      internalBuilder.between(toName(fields), lower, upper);
+      internalBuilder.between(toName(fields), toType(fields), lower, upper);
       return this;
     }
 
@@ -64,78 +67,78 @@ public final class SearchArgumentFactory {
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#equals(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//equals(String, Object)}. */
     public Builder equals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.equals(toName(fields), literal);
+      internalBuilder.equals(toName(fields), toType(fields), literal);
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#in(String, Object...)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//in(String, Object...)}. */
     public Builder in(Fields fields, Object... literals) {
       checkFields(fields);
       if (literals != null && literals.length > 0) {
         checkValueTypes(fields, literals);
         // we just check types, leave the null/length validation to the original implementation.
       }
-      internalBuilder.in(toName(fields), literals);
+      internalBuilder.in(toName(fields), toType(fields), literals);
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#isNull(String)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//isNull(String)}. */
     public Builder isNull(Fields fields) {
       checkFields(fields);
       checkValueTypes(fields, new Object[] { null });
-      internalBuilder.isNull(toName(fields));
+      internalBuilder.isNull(toName(fields), toType(fields));
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThan(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThan(String, Object)}. */
     public Builder lessThan(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.lessThan(toName(fields), literal);
+      internalBuilder.lessThan(toName(fields), toType(fields), literal);
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThanEquals(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThanEquals(String, Object)}. */
     public Builder lessThanEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.lessThanEquals(toName(fields), literal);
+      internalBuilder.lessThanEquals(toName(fields), toType(fields), literal);
       return this;
     }
 
     /**
      * Comprises: {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#startNot() startNot()}.
-     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThanEquals(String, Object)
+     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThanEquals(String, Object)
      * lessThanEquals(String, Object)}.{@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#end() end()}.
      */
     public Builder greaterThan(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.startNot().lessThanEquals(toName(fields), literal).end();
+      internalBuilder.startNot().lessThanEquals(toName(fields), toType(fields), literal).end();
       return this;
     }
 
     /**
      * Comprises: {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#startNot() startNot()}.
-     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThan(String, Object) lessThan(String,
+     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThan(String, Object) lessThan(String,
      * Object)}.{@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#end() end()}.
      */
     public Builder greaterThanEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.startNot().lessThan(toName(fields), literal).end();
+      internalBuilder.startNot().lessThan(toName(fields), toType(fields), literal).end();
       return this;
     }
     
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#nullSafeEquals(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//nullSafeEquals(String, Object)}. */
     public Builder nullSafeEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.nullSafeEquals(toName(fields), literal);
+      internalBuilder.nullSafeEquals(toName(fields), toType(fields), literal);
       return this;
     }
 
@@ -195,6 +198,18 @@ public final class SearchArgumentFactory {
               + "' is not of the correct type. Was " + value.getClass() + " expected derivative of " + typeClass);
         }
       }
+    }
+
+    static PredicateLeaf.Type toType(Fields fields) {
+      Type type = fields.getType(0);
+      if (type.equals(Integer.class)) {
+        return PredicateLeaf.Type.LONG;
+      } else if (type.equals(Long.class)) {
+        return PredicateLeaf.Type.LONG;
+      } else if (type.equals(String.class)) {
+        return PredicateLeaf.Type.STRING;
+      }
+      throw new IllegalStateException("Can't map Fields.Type to PredicateLeaf.Type:" + fields);
     }
 
   }

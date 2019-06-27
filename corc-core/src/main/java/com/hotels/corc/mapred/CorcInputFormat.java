@@ -18,6 +18,7 @@ package com.hotels.corc.mapred;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -204,7 +205,8 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
       throw new IllegalStateException("None of the selected columns were found in the ORC file.");
     }
     LOG.info("Set column projection on columns: {} ({})", ids, names);
-    ColumnProjectionUtils.appendReadColumns(conf, ids); //Got rid of names? Don't know how this affects things
+    List<String> nestedColumnPaths = Collections.emptyList();
+    ColumnProjectionUtils.appendReadColumns(conf, ids, names, nestedColumnPaths);
   }
 
   private final OrcInputFormat orcInputFormat = new OrcInputFormat();

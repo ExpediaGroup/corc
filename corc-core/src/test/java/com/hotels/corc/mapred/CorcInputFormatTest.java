@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.io.orc.OrcSplit;
 import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
@@ -113,8 +114,25 @@ public class CorcInputFormatTest {
     assertThat(splits.length, is(1));
     FileSplit actual = (FileSplit) splits[0];
     assertThat(actual.getPath().toUri().getRawPath(), is(path.toUri().getRawPath()));
-    assertThat(actual.getStart(), is(0L));
-    assertThat(actual.getLength(), is(file.length()));
+    assertThat(actual.getStart(), is(3L));
+    assertThat(actual.getLength(), is(136L));
+    OrcSplit orcSplit = (OrcSplit) actual;
+    assertThat(orcSplit.getFileLength(), is(file.length()));
+
+    // Read from the generated split...
+    StructTypeInfo typeInfo = new StructTypeInfoBuilder()
+            .add("a", TypeInfoFactory.stringTypeInfo)
+            .add("b", TypeInfoFactory.stringTypeInfo)
+            .build();
+    CorcInputFormat.setTypeInfo(conf, typeInfo);
+    CorcInputFormat.setConverterFactoryClass(conf, DefaultConverterFactory.class);
+    RecordReader<NullWritable, Corc> reader = inputFormat.getRecordReader(actual, conf, reporter);
+    Corc corc = reader.createValue();
+
+    reader.next(NullWritable.get(), corc);
+    assertThat(corc.get("a"), is((Object) "A1"));
+    assertThat(corc.get("b"), is((Object) "B1"));
+    reader.close();
   }
 
   @Test
@@ -321,7 +339,7 @@ public class CorcInputFormatTest {
     conf.set(CorcInputFormat.SEARCH_ARGUMENT, CorcInputFormat.toKryo(searchArgument));
 
     SearchArgument sa = CorcInputFormat.getSearchArgument(conf);
-    String kryo = CorcInputFormat.toKryo(searchArgument);
+    String kryo = CorcInputFormat.toKryo(sa);
 
     assertThat(kryo, is(CorcInputFormat.toKryo(searchArgument)));
   }

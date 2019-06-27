@@ -117,7 +117,7 @@ public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector
     validateNamesUnique(typeInfo.getAllStructFieldNames());
     this.typeInfo = typeInfo;
     this.schemaTypeInfo = schemaTypeInfo;
-    searchArgumentKryo = searchArgument == null ? null : searchArgument.toKryo();
+    searchArgumentKryo = searchArgument == null ? null : CorcInputFormat.toKryo(searchArgument);
     this.converterFactory = converterFactory;
     this.type = type;
   }
@@ -263,17 +263,17 @@ public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector
      * <p/>
      * Only Hive primitive types with equivalent Java types are supported:
      * <ul>
-     * <li>{@link java.util.String}</li>
-     * <li>{@link java.util.Boolean}</li>
-     * <li>{@link java.util.Byte}</li>
-     * <li>{@link java.util.Short}</li>
-     * <li>{@link java.util.Integer}</li>
-     * <li>{@link java.util.Long}</li>
-     * <li>{@link java.util.Float}</li>
-     * <li>{@link java.util.Double}</li>
-     * <li>{@link java.sql.Timestamp}</li>
-     * <li>{@link java.sql.Date}</li>
-     * <li>{@link Byte#TYPE byte[]}</li>
+     * <li>{@linkjava.util.String}</li>
+     * <li>{@linkjava.util.Boolean}</li>
+     * <li>{@linkjava.util.Byte}</li>
+     * <li>{@linkjava.util.Short}</li>
+     * <li>{@linkjava.util.Integer}</li>
+     * <li>{@linkjava.util.Long}</li>
+     * <li>{@linkjava.util.Float}</li>
+     * <li>{@linkjava.util.Double}</li>
+     * <li>{@linkjava.sql.Timestamp}</li>
+     * <li>{@linkjava.sql.Date}</li>
+     * <li>{@linkByte#TYPE byte[]}</li>
      * </ul>
      * <p/>
      * {@code CHAR}, {@code VARCHAR}, {@code DECIMAL}, {@code STRUCT}, {@code ARRAY}, {@code MAP} and {@code UNIONTYPE}
@@ -339,17 +339,17 @@ public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector
      * <p/>
      * Only Hive primitive types with equivalent Java types are supported:
      * <ul>
-     * <li>{@link java.util.String}</li>
-     * <li>{@link java.util.Boolean}</li>
-     * <li>{@link java.util.Byte}</li>
-     * <li>{@link java.util.Short}</li>
-     * <li>{@link java.util.Integer}</li>
-     * <li>{@link java.util.Long}</li>
-     * <li>{@link java.util.Float}</li>
-     * <li>{@link java.util.Double}</li>
-     * <li>{@link java.sql.Timestamp}</li>
-     * <li>{@link java.sql.Date}</li>
-     * <li>{@link Byte#TYPE byte[]}</li>
+     * <li>{@linkjava.util.String}</li>
+     * <li>{@linkjava.util.Boolean}</li>
+     * <li>{@linkjava.util.Byte}</li>
+     * <li>{@linkjava.util.Short}</li>
+     * <li>{@linkjava.util.Integer}</li>
+     * <li>{@linkjava.util.Long}</li>
+     * <li>{@linkjava.util.Float}</li>
+     * <li>{@linkjava.util.Double}</li>
+     * <li>{@linkjava.sql.Timestamp}</li>
+     * <li>{@linkjava.sql.Date}</li>
+     * <li>{@linkByte#TYPE byte[]}</li>
      * </ul>
      * <p/>
      * {@code CHAR}, {@code VARCHAR}, {@code DECIMAL}, {@code STRUCT}, {@code ARRAY}, {@code MAP} and {@code UNIONTYPE}
@@ -480,21 +480,21 @@ public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector
      * Care must be taken when deciding how best to specify the types of {@link Fields} as there is not a one-to-one
      * bidirectional mapping between Cascading types and Hive types. The {@link TypeInfo TypeInfo} is able to represent
      * richer, more complex types. Consider your ORC schema and the mappings to {@link Fields} types carefully.
-     * {@link TypeInfo} variants of {@link #schema(TypeInfo) schema(...)} are provided to allow finer control if needed.
+     * {@link TypeInfo} variants of {@link #//schema(TypeInfo) schema(...)} are provided to allow finer control if needed.
      * <p/>
      * Only Hive primitive types with equivalent Java types are supported:
      * <ul>
-     * <li>{@link java.util.String}</li>
-     * <li>{@link java.util.Boolean}</li>
-     * <li>{@link java.util.Byte}</li>
-     * <li>{@link java.util.Short}</li>
-     * <li>{@link java.util.Integer}</li>
-     * <li>{@link java.util.Long}</li>
-     * <li>{@link java.util.Float}</li>
-     * <li>{@link java.util.Double}</li>
-     * <li>{@link java.sql.Timestamp}</li>
-     * <li>{@link java.sql.Date}</li>
-     * <li>{@link Byte#TYPE byte[]}</li>
+     * <li>{@linkjava.util.String}</li>
+     * <li>{@linkjava.util.Boolean}</li>
+     * <li>{@linkjava.util.Byte}</li>
+     * <li>{@linkjava.util.Short}</li>
+     * <li>{@linkjava.util.Integer}</li>
+     * <li>{@linkjava.util.Long}</li>
+     * <li>{@linkjava.util.Float}</li>
+     * <li>{@linkjava.util.Double}</li>
+     * <li>{@linkjava.sql.Timestamp}</li>
+     * <li>{@linkjava.sql.Date}</li>
+     * <li>{@linkByte#TYPE byte[]}</li>
      * </ul>
      * <p/>
      * {@code CHAR}, {@code VARCHAR}, {@code DECIMAL}, {@code STRUCT}, {@code ARRAY}, {@code MAP} and {@code UNIONTYPE}
