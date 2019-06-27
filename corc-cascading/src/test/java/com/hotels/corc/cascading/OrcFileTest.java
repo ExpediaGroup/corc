@@ -837,7 +837,7 @@ public class OrcFileTest {
     List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
 
     assertThat(list.size(), is(1));
-    assertThat(list.get(0).getObject(0), is((Object) new HiveDecimalWritable("0.1")));
+    assertThat(list.get(0).getObject(0), is((Object) new BigDecimal("0.1")));
   }
 
   @Test
@@ -925,18 +925,6 @@ public class OrcFileTest {
     assertThat(list.size(), is(2));
     assertThat(list.get(0).getObject(0), is((Object) "hello"));
     assertThat(list.get(1).getObject(0), is(nullValue()));
-  }
-
-  static PredicateLeaf.Type toType(Fields fields) {
-    Type type = fields.getType(0);
-    if (type.equals(Integer.class)) {
-      return PredicateLeaf.Type.LONG;
-    } else if (type.equals(Long.class)) {
-      return PredicateLeaf.Type.LONG;
-    } else if (type.equals(String.class)) {
-      return PredicateLeaf.Type.STRING;
-    }
-    throw new IllegalStateException("Can't map Fields.Type to PredicateLeaf.Type:" + fields);
   }
 
 }

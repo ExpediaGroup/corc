@@ -21,6 +21,8 @@ import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import cascading.tuple.Fields;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * A {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory} that uses {@link Fields}. Extracts the column name
@@ -208,6 +210,10 @@ public final class SearchArgumentFactory {
         return PredicateLeaf.Type.LONG;
       } else if (type.equals(String.class)) {
         return PredicateLeaf.Type.STRING;
+      } else if (type.equals(Date.class)){
+        return PredicateLeaf.Type.DATE;
+      } else if(type.equals(BigDecimal.class)){
+          return PredicateLeaf.Type.DECIMAL;
       }
       throw new IllegalStateException("Can't map Fields.Type to PredicateLeaf.Type:" + fields);
     }
