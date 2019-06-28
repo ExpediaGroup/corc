@@ -785,22 +785,23 @@ public class OrcFileTest {
 
   @Test
   public void readDatePredicatePushdown() throws IOException {
-    TypeInfo typeInfo = TypeInfoFactory.dateTypeInfo;
+    TypeInfo typeInfo = TypeInfoFactory.longTypeInfo;
 
-    Date date1 = Date.valueOf("1970-01-01");
-    Date date2 = Date.valueOf("1970-01-02");
+    Long date1 = Date.valueOf("1970-01-01").getTime();
+    Long date2 = Date.valueOf("1970-01-02").getTime();
+
 
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
       writer.addRow(date1);
       writer.addRow(date2);
     }
 
-    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.dateTypeInfo).build();
+    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.longTypeInfo).build();
 
     SearchArgument searchArgument = SearchArgumentFactory
         .newBuilder()
         .startAnd()
-        .equals("a", PredicateLeaf.Type.DATE, new DateWritable(date1))
+        .equals("a", PredicateLeaf.Type.LONG, date1)
         .end()
         .build();
 
@@ -810,7 +811,7 @@ public class OrcFileTest {
     List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
 
     assertThat(list.size(), is(1));
-    assertThat(((Date) list.get(0).getObject(0)).getTime(), is(date1.getTime()));
+    assertThat(((Long) list.get(0).getObject(0)), is(date1));
   }
 
   @Test

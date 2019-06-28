@@ -135,7 +135,7 @@ class EvaluatorFactory {
     case TIMESTAMP:
       return new TimestampWritable((Timestamp) literal);
     case DATE:
-      return (DateWritable) literal;
+      return new LongWritable((Long) literal);
     case CHAR:
       stringLiteral = (String) literal;
       return new HiveCharWritable(new HiveChar(stringLiteral, stringLiteral.length()));
@@ -143,7 +143,7 @@ class EvaluatorFactory {
       stringLiteral = (String) literal;
       return new HiveVarcharWritable(new HiveVarchar(stringLiteral, stringLiteral.length()));
     case DECIMAL:
-      return new HiveDecimalWritable(HiveDecimal.create((BigDecimal) literal));
+      return new HiveDecimalWritable(literal.toString());
     default:
       throw new IllegalArgumentException("Unsupported category: " + category);
     }
