@@ -4,6 +4,10 @@
 .project
 .springBeans
 
+# Intellij
+.idea/
+*.iml
+
 # Netbeans files
 nbactions.xml
 
