@@ -843,7 +843,7 @@ public class OrcFileTest {
 
   @Test
   public void readCharPredicatePushdown() throws IOException {
-    TypeInfo typeInfo = TypeInfoFactory.getCharTypeInfo(3);
+    TypeInfo typeInfo = TypeInfoFactory.stringTypeInfo;
 
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
       writer.addRow(new HiveChar("foo", 3));
@@ -855,7 +855,7 @@ public class OrcFileTest {
     SearchArgument searchArgument = SearchArgumentFactory
         .newBuilder()
         .startAnd()
-        .equals("a", PredicateLeaf.Type.STRING, new HiveChar("foo", 5))
+        .equals("a", PredicateLeaf.Type.STRING, new HiveChar("foo", 3).toString())
         .end()
         .build();
 
@@ -863,6 +863,11 @@ public class OrcFileTest {
     Tap<?, ?, ?> tap = new Hfs(orcFile, path);
 
     List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
+
+    //Object object1 = list.get(0).getObject(0);
+    //Object object2 = (Object) "foo";
+    //assertThat(object1, is(object2));
+
 
     assertThat(list.size(), is(1));
     assertThat(list.get(0).getObject(0), is((Object) "foo"));
