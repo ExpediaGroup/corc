@@ -58,6 +58,7 @@ public class SearchArgumentFactoryTest {
     when(mockInternal.end()).thenReturn(mockInternal);
   }
 
+    //Possibly moving this
     static PredicateLeaf.Type toType(Fields fields) {
         Type type = fields.getType(0);
         if (type.equals(Integer.class)) {

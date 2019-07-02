@@ -303,10 +303,6 @@ public class EvaluatorFactoryTest {
         is((Comparable) new HiveDecimalWritable(HiveDecimal.create(new BigDecimal("0.0")))));
   }
 
-  @Test(expected = ClassCastException.class)
-  public void decimalWithDecimalInput() {
-    toComparable(DECIMAL, HiveDecimal.create(new BigDecimal("0.0")));
-  }
 
   @Test(expected = IllegalArgumentException.class)
   public void binaryTypical() {

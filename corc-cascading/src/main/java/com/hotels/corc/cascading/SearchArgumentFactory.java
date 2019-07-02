@@ -23,7 +23,6 @@ import cascading.tuple.Fields;
 import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
 
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -57,7 +56,7 @@ public final class SearchArgumentFactory {
       this.internalBuilder = internalBuilder;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//between(String, Object, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#between(String, Object, Object)}. */
     public Builder between(Fields fields, Object lower, Object upper) {
       checkFields(fields);
       checkValueTypes(fields, lower, upper);
@@ -71,7 +70,7 @@ public final class SearchArgumentFactory {
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//equals(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#equals(String, Object)}. */
     public Builder equals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
@@ -79,7 +78,7 @@ public final class SearchArgumentFactory {
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//in(String, Object...)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#in(String, Object...)}. */
     public Builder in(Fields fields, Object... literals) {
       checkFields(fields);
       if (literals != null && literals.length > 0) {
@@ -90,7 +89,7 @@ public final class SearchArgumentFactory {
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//isNull(String)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#isNull(String)}. */
     public Builder isNull(Fields fields) {
       checkFields(fields);
       checkValueTypes(fields, new Object[] { null });
@@ -98,7 +97,7 @@ public final class SearchArgumentFactory {
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThan(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThan(String, Object)}. */
     public Builder lessThan(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
@@ -106,7 +105,7 @@ public final class SearchArgumentFactory {
       return this;
     }
 
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThanEquals(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThanEquals(String, Object)}. */
     public Builder lessThanEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
@@ -116,7 +115,7 @@ public final class SearchArgumentFactory {
 
     /**
      * Comprises: {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#startNot() startNot()}.
-     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThanEquals(String, Object)
+     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThanEquals(String, Object)
      * lessThanEquals(String, Object)}.{@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#end() end()}.
      */
     public Builder greaterThan(Fields fields, Object literal) {
@@ -128,7 +127,7 @@ public final class SearchArgumentFactory {
 
     /**
      * Comprises: {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#startNot() startNot()}.
-     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//lessThan(String, Object) lessThan(String,
+     * {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#lessThan(String, Object) lessThan(String,
      * Object)}.{@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#end() end()}.
      */
     public Builder greaterThanEquals(Fields fields, Object literal) {
@@ -138,7 +137,7 @@ public final class SearchArgumentFactory {
       return this;
     }
     
-    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#//nullSafeEquals(String, Object)}. */
+    /** See {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder#nullSafeEquals(String, Object)}. */
     public Builder nullSafeEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
