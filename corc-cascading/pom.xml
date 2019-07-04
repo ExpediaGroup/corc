@@ -13,8 +13,8 @@
   <description>An ORC File Scheme for Cascading</description>
 
   <properties>
-    <cascading.version>3.0.2</cascading.version>
-    <tez.version>0.9.2</tez.version>
+    <cascading.version>3.3.0</cascading.version>
+    <tez.version>0.8.2</tez.version>
   </properties>
 
   <dependencies>
@@ -60,6 +60,12 @@
     <dependency>
       <groupId>org.apache.tez</groupId>
       <artifactId>tez-mapreduce</artifactId>
+      <version>${tez.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tez</groupId>
+      <artifactId>tez-runtime-library</artifactId>
       <version>${tez.version}</version>
       <scope>provided</scope>
     </dependency>
