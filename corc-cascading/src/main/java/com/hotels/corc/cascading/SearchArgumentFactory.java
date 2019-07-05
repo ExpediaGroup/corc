@@ -15,15 +15,11 @@
  */
 package com.hotels.corc.cascading;
 
-import org.apache.hadoop.hive.common.type.HiveChar;
-import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 
 import cascading.tuple.Fields;
-import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
 
-import java.lang.reflect.Type;
-import java.util.Date;
+import static com.hotels.corc.cascading.FieldsTypeUtils.toType;
 
 /**
  * A {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory} that uses {@link Fields}. Extracts the column name
@@ -201,24 +197,6 @@ public final class SearchArgumentFactory {
               + "' is not of the correct type. Was " + value.getClass() + " expected derivative of " + typeClass);
         }
       }
-    }
-
-    static PredicateLeaf.Type toType(Fields fields) {
-      Type type = fields.getType(0);
-      if (type.equals(Integer.class)) {
-        return PredicateLeaf.Type.LONG;
-      } else if (type.equals(Long.class)) {
-        return PredicateLeaf.Type.LONG;
-      } else if (type.equals(String.class)) {
-        return PredicateLeaf.Type.STRING;
-      } else if (type.equals(Date.class)){
-        return PredicateLeaf.Type.DATE;
-      } else if(type.equals(HiveDecimalWritable.class)){
-          return PredicateLeaf.Type.DECIMAL;
-      } else if (type.equals(HiveChar.class)){
-        return PredicateLeaf.Type.STRING;
-      }
-      throw new IllegalStateException("Can't map Fields.Type to PredicateLeaf.Type:" + fields);
     }
 
   }

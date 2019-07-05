@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ##[TBD]
 ### Changed
 - Upgraded `hive` version to 2.3.4 (was 1.0.0).
+- Upgraded `cascading` version to  3.3.0 (was 3.0.2).
+- Upgraded `tez` version to 0.8.2 (was 0.6.2). 
 
 ## [1.0.0] - 2015-05-15
 ### Added

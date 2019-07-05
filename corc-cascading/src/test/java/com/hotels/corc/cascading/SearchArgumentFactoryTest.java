@@ -15,10 +15,12 @@
  */
 package com.hotels.corc.cascading;
 
+import static com.google.inject.matcher.Matchers.any;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,47 +37,32 @@ import cascading.tuple.Fields;
 
 import com.hotels.corc.cascading.SearchArgumentFactory.Builder;
 
-import java.lang.reflect.Type;
-
 @RunWith(MockitoJUnitRunner.class)
 public class SearchArgumentFactoryTest {
 
   private static final Fields ONE = new Fields("A", Integer.class);
   private static final Fields TWO = new Fields(Fields.names("A", "B"), Fields.types(String.class, Integer.class));
+  private static final PredicateLeaf.Type ONE_TYPE = PredicateLeaf.Type.LONG;
 
   @Mock
   private org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder mockInternal;
 
   private SearchArgumentFactory.Builder builder;
 
-  //Don't know how to get the type right for this setup
   @Before
   public void setup() {
     builder = new Builder(mockInternal);
     when(mockInternal.startNot()).thenReturn(mockInternal);
-    when(mockInternal.lessThan(anyString(), same(toType(ONE)), any())).thenReturn(mockInternal);
-    when(mockInternal.lessThanEquals(anyString(), same(toType(ONE)), any())).thenReturn(mockInternal);
+    when(mockInternal.lessThan(anyString(), same(ONE_TYPE), any())).thenReturn(mockInternal);
+    when(mockInternal.lessThanEquals(anyString(), same(ONE_TYPE), any())).thenReturn(mockInternal);
     when(mockInternal.end()).thenReturn(mockInternal);
   }
-
-    //Possibly moving this
-    static PredicateLeaf.Type toType(Fields fields) {
-        Type type = fields.getType(0);
-        if (type.equals(Integer.class)) {
-            return PredicateLeaf.Type.LONG;
-        } else if (type.equals(Long.class)) {
-            return PredicateLeaf.Type.LONG;
-        } else if (type.equals(String.class)) {
-            return PredicateLeaf.Type.STRING;
-        }
-        throw new IllegalStateException("Can't map Fields.Type to PredicateLeaf.Type:" + fields);
-    }
 
   @Test
   public void between() {
     Builder chain = builder.between(ONE, 1, 2);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).between("a", toType(ONE), 1, 2);
+    verify(mockInternal).between("a", ONE_TYPE, 1, 2);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -107,7 +94,7 @@ public class SearchArgumentFactoryTest {
   public void equals() {
     Builder chain = builder.equals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).equals("a", toType(ONE), 1);
+    verify(mockInternal).equals("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -134,7 +121,7 @@ public class SearchArgumentFactoryTest {
   public void lessThan() {
     Builder chain = builder.lessThan(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).lessThan("a", toType(ONE), 1);
+    verify(mockInternal).lessThan("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -161,7 +148,7 @@ public class SearchArgumentFactoryTest {
   public void lessThanEquals() {
     Builder chain = builder.lessThanEquals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).lessThanEquals("a", toType(ONE), 1);
+    verify(mockInternal).lessThanEquals("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -189,7 +176,7 @@ public class SearchArgumentFactoryTest {
     Builder chain = builder.greaterThan(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
     verify(mockInternal).startNot();
-    verify(mockInternal).lessThanEquals("a", toType(ONE), 1);
+    verify(mockInternal).lessThanEquals("a", ONE_TYPE, 1);
     verify(mockInternal).end();
   }
 
@@ -218,7 +205,7 @@ public class SearchArgumentFactoryTest {
     Builder chain = builder.greaterThanEquals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
     verify(mockInternal).startNot();
-    verify(mockInternal).lessThan("a", toType(ONE), 1);
+    verify(mockInternal).lessThan("a", ONE_TYPE, 1);
     verify(mockInternal).end();
   }
 
@@ -246,7 +233,7 @@ public class SearchArgumentFactoryTest {
   public void nullSafeEquals() {
     Builder chain = builder.nullSafeEquals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).nullSafeEquals("a", toType(ONE), 1);
+    verify(mockInternal).nullSafeEquals("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -273,7 +260,7 @@ public class SearchArgumentFactoryTest {
   public void isNull() {
     Builder chain = builder.isNull(ONE);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).isNull("a", toType(ONE));
+    verify(mockInternal).isNull("a", ONE_TYPE);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -300,7 +287,7 @@ public class SearchArgumentFactoryTest {
   public void in() {
     Builder chain = builder.in(ONE, 1, 2, 3);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).in("a", toType(ONE), 1, 2, 3);
+    verify(mockInternal).in("a", ONE_TYPE, 1, 2, 3);
   }
 
   @Test(expected = IllegalArgumentException.class)

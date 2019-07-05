@@ -1,10 +1,10 @@
 /**
- * Copyright (C) 2015-2019 Expedia Inc and the original spring-integration contributors.
+ * Copyright (C) 2015-2019 Expedia Inc and the original Hive project.
  *
  * The method toKryo(SearchArgument sarg) is a copy of:
  *
- * https://github.com/apache/hive/blob/rel/release-1.2.2/
- * ql/src/java/org/apache/hadoop/hive/ql/io/sarg/SearchArgumentImpl.java
+ * https://github.com/apache/hive/blob/master_2015_11_30/ql/src/test/
+ * org/apache/hadoop/hive/ql/io/orc/TestInputOutputFormat.java#L116
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.apache.hadoop.hive.ql.io.orc.OrcSplit;
 import org.apache.hadoop.hive.ql.io.orc.OrcStruct;
 import org.apache.hadoop.hive.ql.io.orc.Reader;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
+import org.apache.hadoop.hive.ql.io.sarg.ConvertAstToSearchArg;
 import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
@@ -51,11 +52,9 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.hadoop.hive.ql.io.sarg.ConvertAstToSearchArg;
 
 import com.hotels.corc.ConverterFactory;
 import com.hotels.corc.Corc;
