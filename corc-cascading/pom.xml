@@ -14,7 +14,7 @@
 
   <properties>
     <cascading.version>3.3.0</cascading.version>
-    <tez.version>0.6.2</tez.version>
+    <tez.version>0.8.2</tez.version>
   </properties>
 
   <dependencies>
