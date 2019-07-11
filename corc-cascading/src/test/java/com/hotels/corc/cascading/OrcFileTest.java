@@ -812,7 +812,6 @@ public class OrcFileTest {
     Timestamp timestamp2 = Timestamp.valueOf("1970-01-02 00:00:00");
     Timestamp timestamp3 = Timestamp.valueOf("1971-01-02 00:00:00");
 
-
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
       writer.addRow(timestamp1);
       writer.addRow(timestamp2);
