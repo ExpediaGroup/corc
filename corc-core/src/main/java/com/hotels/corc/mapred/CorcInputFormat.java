@@ -314,6 +314,13 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
 
   }
 
+  /*
+   *  Copyright (C) the original Hive project.
+   *  The method toKryo(SearchArgument sarg) is a copy of:
+   *
+   *  https://github.com/apache/hive/blob/master_2015_11_30/ql/src/test/
+   *  org/apache/hadoop/hive/ql/io/orc/TestInputOutputFormat.java#L116
+   */
   public static String toKryo(SearchArgument sarg) {
     Output out = new Output(4 * 1024, 10 * 1024 * 1024);
     new Kryo().writeObject(out, sarg);

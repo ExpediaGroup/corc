@@ -25,6 +25,7 @@ import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 
@@ -32,84 +33,91 @@ import static com.hotels.corc.cascading.FieldsTypeUtils.toType;
 
 public class FieldsTypeUtilsTest {
 
-    @Test
-    public void intToLongType(){
-        Fields ONE = new Fields("A", Integer.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+  @Test
+  public void intToLongType(){
+    Fields fields = new Fields("A", Integer.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-        assertThat(oneType, is (PredicateLeaf.Type.LONG));
-    }
+    assertThat(fieldsType, is (PredicateLeaf.Type.LONG));
+  }
 
-    @Test
-    public void longToLongType(){
-        Fields ONE = new Fields("A", Long.class);
-        PredicateLeaf.Type oneType = toType(ONE);
 
-        assertThat(oneType, is (PredicateLeaf.Type.LONG));
-    }
+  @Test
+  public void longToLongType(){
+    Fields fields = new Fields("A", Long.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void doubleToFloatType(){
-        Fields ONE = new Fields("A", Double.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.LONG));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.FLOAT));
-    }
+  @Test
+  public void doubleToFloatType(){
+    Fields fields = new Fields("A", Double.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void dateToDateType(){
-        Fields ONE = new Fields("A", Date.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.FLOAT));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.DATE));
-    }
+  @Test
+  public void dateToDateType(){
+    Fields fields = new Fields("A", Date.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void stringToStringType(){
-        Fields ONE = new Fields("A", String.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.DATE));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.STRING));
-    }
+  @Test
+  public void stringToStringType(){
+    Fields fields = new Fields("A", String.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void hiveCharToStringType(){
-        Fields ONE = new Fields("A", HiveChar.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.STRING));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.STRING));
-    }
+  @Test
+  public void hiveCharToStringType(){
+    Fields fields = new Fields("A", HiveChar.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void hiveVarcharToStringType(){
-        Fields ONE = new Fields("A", HiveVarchar.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.STRING));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.STRING));
-    }
+  @Test
+  public void hiveVarcharToStringType(){
+    Fields fields = new Fields("A", HiveVarchar.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void hiveDecimalWritableToDecimalType(){
-        Fields ONE = new Fields("A", HiveDecimalWritable.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.STRING));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.DECIMAL));
-    }
+  @Test
+  public void hiveDecimalWritableToDecimalType(){
+    Fields fields = new Fields("A", HiveDecimalWritable.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void timestampToTimestampType(){
-        Fields ONE = new Fields("A", Timestamp.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.DECIMAL));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.TIMESTAMP));
-    }
+  @Test
+  public void timestampToTimestampType(){
+    Fields fields = new Fields("A", Timestamp.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
 
-    @Test
-    public void booleanToBooleanType(){
-        Fields ONE = new Fields("A", Boolean.class);
-        PredicateLeaf.Type oneType = toType(ONE);
+    assertThat(fieldsType, is (PredicateLeaf.Type.TIMESTAMP));
+  }
 
-        assertThat(oneType, is (PredicateLeaf.Type.BOOLEAN));
-    }
+  @Test
+  public void booleanToBooleanType(){
+    Fields fields = new Fields("A", Boolean.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
+
+    assertThat(fieldsType, is (PredicateLeaf.Type.BOOLEAN));
+  }
+
+  @Test (expected = IllegalStateException.class)
+  public void incorrectDecimalType(){
+    Fields fields = new Fields("A", BigDecimal.class);
+    PredicateLeaf.Type fieldsType = toType(fields);
+  }
 
 }
