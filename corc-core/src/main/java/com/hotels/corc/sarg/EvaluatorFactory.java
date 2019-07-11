@@ -15,7 +15,7 @@
  */
 package com.hotels.corc.sarg;
 
-import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +135,17 @@ class EvaluatorFactory {
     case TIMESTAMP:
       return new TimestampWritable((Timestamp) literal);
     case DATE:
-      return (DateWritable) literal;
+      if (literal instanceof Timestamp) { //yes, Hive turns Dates into Timestamps
+        long tsms = ((Timestamp)literal).getTime();
+        int days = DateWritable.millisToDays(tsms);
+        DateWritable fromDays = new DateWritable(days);
+        return fromDays;
+      } else if(literal instanceof Date) {
+        return new DateWritable((Date)literal);
+      } else {
+        throw new IllegalArgumentException("Unsupported date type: " + literal);
+      }
+      
     case CHAR:
       stringLiteral = (String) literal;
       return new HiveCharWritable(new HiveChar(stringLiteral, stringLiteral.length()));
