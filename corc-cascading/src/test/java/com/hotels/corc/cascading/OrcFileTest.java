@@ -47,6 +47,7 @@ import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -802,6 +803,7 @@ public class OrcFileTest {
     assertThat((list.get(0).getObject(0)), is((Object)date1));
   }
 
+  @Ignore("Below runs into an issue where Timestamp object is re-used when Tuples from file are iterated over")
   @Test
   public void readTimestampPredicatePushdown() throws IOException {
     TypeInfo typeInfo = TypeInfoFactory.timestampTypeInfo;
@@ -834,6 +836,21 @@ public class OrcFileTest {
     assertThat(list.size(), is(1));
     assertThat(((Timestamp) list.get(0).getObject(0)), is(timestamp1));
   }
+  
+  @Test(expected=UnsupportedOperationException.class)
+  public void readTimestampNotSupported() throws IOException {
+    Timestamp timestamp1 = Timestamp.valueOf("1970-01-01 00:00:00");
+    
+    SearchArgument searchArgument = SearchArgumentFactory
+        .newBuilder()
+        .startAnd()
+        .equals("a", PredicateLeaf.Type.TIMESTAMP, timestamp1)
+        .end()
+        .build();
+    
+     OrcFile.source().searchArgument(searchArgument).build();
+  }
+  
 
   @Test
   public void readDecimalPredicatePushdown() throws IOException {
