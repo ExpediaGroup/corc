@@ -136,10 +136,9 @@ class EvaluatorFactory {
       return new TimestampWritable((Timestamp) literal);
     case DATE:
       if (literal instanceof Timestamp) { //yes, Hive turns Dates into Timestamps
-        long tsms = ((Timestamp)literal).getTime();
-        int days = DateWritable.millisToDays(tsms);
-        DateWritable fromDays = new DateWritable(days);
-        return fromDays;
+        long timeStampMillis = ((Timestamp)literal).getTime();
+        int days = DateWritable.millisToDays(timeStampMillis);
+        return new DateWritable(days);
       } else if(literal instanceof Date) {
         return new DateWritable((Date)literal);
       } else {
