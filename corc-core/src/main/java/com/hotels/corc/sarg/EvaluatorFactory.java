@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package com.hotels.corc.sarg;
 
-import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +135,16 @@ class EvaluatorFactory {
     case TIMESTAMP:
       return new TimestampWritable((Timestamp) literal);
     case DATE:
-      return (DateWritable) literal;
+      if (literal instanceof Timestamp) { //yes, Hive turns Dates into Timestamps
+        long timeStampMillis = ((Timestamp)literal).getTime();
+        int days = DateWritable.millisToDays(timeStampMillis);
+        return new DateWritable(days);
+      } else if(literal instanceof Date) {
+        return new DateWritable((Date)literal);
+      } else {
+        throw new IllegalArgumentException("Unsupported date type: " + literal);
+      }
+      
     case CHAR:
       stringLiteral = (String) literal;
       return new HiveCharWritable(new HiveChar(stringLiteral, stringLiteral.length()));
@@ -143,7 +152,7 @@ class EvaluatorFactory {
       stringLiteral = (String) literal;
       return new HiveVarcharWritable(new HiveVarchar(stringLiteral, stringLiteral.length()));
     case DECIMAL:
-      return new HiveDecimalWritable(HiveDecimal.create((BigDecimal) literal));
+      return new HiveDecimalWritable(HiveDecimal.create(literal.toString()));
     default:
       throw new IllegalArgumentException("Unsupported category: " + category);
     }

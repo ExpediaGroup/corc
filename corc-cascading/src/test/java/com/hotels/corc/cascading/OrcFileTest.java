@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  */
 package com.hotels.corc.cascading;
 
-import static cascading.tuple.Fields.names;
-import static cascading.tuple.Fields.types;
-import static com.hotels.plunger.asserts.PlungerAssert.tupleEntryList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+
+import static com.hotels.plunger.asserts.PlungerAssert.tupleEntryList;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,16 +37,17 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hive.common.type.HiveChar;
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.common.type.HiveVarchar;
-import org.apache.hadoop.hive.ql.io.RecordIdentifier;
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
-import org.apache.hadoop.hive.serde2.io.DateWritable;
+import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
 import org.apache.hadoop.hive.serde2.objectinspector.StandardUnionObjectInspector.StandardUnion;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
 import org.apache.hadoop.mapred.JobConf;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -729,36 +730,6 @@ public class OrcFileTest {
   }
 
   @Test
-  public void readFromTransactionalTable() throws Exception {
-    Fields fields = new Fields(names("id", "msg"), types(int.class, String.class));
-    List<TupleEntry> actual = Plunger.readDataFromTap(
-        new Hfs(OrcFile.source().declaredFields(fields).schemaFromFile().build(),
-            "src/test/data/test_table/continent=Asia/country=India")).asTupleEntryList();
-    List<TupleEntry> expected = new DataBuilder(fields)
-        .addTuple(2, "UPDATED: Streaming to welcome")
-        .addTuple(3, "updated")
-        .build()
-        .asTupleEntryList();
-    assertThat(actual, is(tupleEntryList(expected)));
-  }
-
-  @Test
-  public void readFromTransactionalTableWithRowId() throws Exception {
-    // "ROW__ID" is a magic value
-    Fields fields = new Fields(names("ROW__ID", "id", "msg"), types(RecordIdentifier.class, int.class, String.class));
-    List<TupleEntry> actual = Plunger.readDataFromTap(
-        new Hfs(OrcFile.source().declaredFields(fields).schemaFromFile().build(),
-            "src/test/data/test_table/continent=Asia/country=India")).asTupleEntryList();
-
-    List<TupleEntry> expected = new DataBuilder(fields)
-        .addTuple(new RecordIdentifier(1, 0, 1), 2, "UPDATED: Streaming to welcome")
-        .addTuple(new RecordIdentifier(7, 0, 0), 3, "updated")
-        .build()
-        .asTupleEntryList();
-    assertThat(actual, is(tupleEntryList(expected)));
-  }
-
-  @Test
   public void readStringPredicatePushdown() throws IOException {
     TypeInfo typeInfo = TypeInfoFactory.stringTypeInfo;
 
@@ -769,7 +740,7 @@ public class OrcFileTest {
 
     StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
 
-    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "hello").end().build();
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", PredicateLeaf.Type.STRING, "hello").end().build();
 
     OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
     Tap<?, ?, ?> tap = new Hfs(orcFile, path);
@@ -778,6 +749,28 @@ public class OrcFileTest {
 
     assertThat(list.size(), is(1));
     assertThat(list.get(0).getObject(0), is((Object) "hello"));
+  }
+
+  @Test
+  public void readBooleanPredicatePushdown() throws IOException {
+    TypeInfo typeInfo = TypeInfoFactory.booleanTypeInfo;
+
+    try (OrcWriter writer = getOrcWriter(typeInfo)) {
+      writer.addRow(true);
+      writer.addRow(false);
+    }
+
+    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.booleanTypeInfo).build();
+
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", PredicateLeaf.Type.BOOLEAN, true).end().build();
+
+    OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
+    Tap<?, ?, ?> tap = new Hfs(orcFile, path);
+
+    List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
+
+    assertThat(list.size(), is(1));
+    assertThat(list.get(0).getObject(0), is((Object) true));
   }
 
   @Test
@@ -797,7 +790,7 @@ public class OrcFileTest {
     SearchArgument searchArgument = SearchArgumentFactory
         .newBuilder()
         .startAnd()
-        .equals("a", new DateWritable(date1))
+        .equals("a", PredicateLeaf.Type.DATE, date1)
         .end()
         .build();
 
@@ -807,8 +800,56 @@ public class OrcFileTest {
     List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
 
     assertThat(list.size(), is(1));
-    assertThat(((Date) list.get(0).getObject(0)).getTime(), is(date1.getTime()));
+    assertThat((list.get(0).getObject(0)), is((Object)date1));
   }
+
+  @Ignore("Below runs into an issue where Timestamp object is re-used when Tuples from file are iterated over")
+  @Test
+  public void readTimestampPredicatePushdown() throws IOException {
+    TypeInfo typeInfo = TypeInfoFactory.timestampTypeInfo;
+
+    Timestamp timestamp1 = Timestamp.valueOf("1970-01-01 00:00:00");
+    Timestamp timestamp2 = Timestamp.valueOf("1970-01-02 00:00:00");
+    Timestamp timestamp3 = Timestamp.valueOf("1971-01-02 00:00:00");
+
+    try (OrcWriter writer = getOrcWriter(typeInfo)) {
+      writer.addRow(timestamp1);
+      writer.addRow(timestamp2);
+      writer.addRow(timestamp3);
+    }
+
+    StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.timestampTypeInfo).build();
+
+    SearchArgument searchArgument = SearchArgumentFactory
+            .newBuilder()
+            .startAnd()
+            .equals("a", PredicateLeaf.Type.TIMESTAMP, timestamp1)
+            .end()
+            .build();
+
+    OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
+    Tap<?, ?, ?> tap = new Hfs(orcFile, path);
+
+    List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
+
+    assertThat(list.size(), is(1));
+    assertThat(((Timestamp) list.get(0).getObject(0)), is(timestamp1));
+  }
+  
+  @Test(expected=UnsupportedOperationException.class)
+  public void readTimestampNotSupported() throws IOException {
+    Timestamp timestamp1 = Timestamp.valueOf("1970-01-01 00:00:00");
+    
+    SearchArgument searchArgument = SearchArgumentFactory
+        .newBuilder()
+        .startAnd()
+        .equals("a", PredicateLeaf.Type.TIMESTAMP, timestamp1)
+        .end()
+        .build();
+    
+     OrcFile.source().searchArgument(searchArgument).build();
+  }
+  
 
   @Test
   public void readDecimalPredicatePushdown() throws IOException {
@@ -824,7 +865,7 @@ public class OrcFileTest {
     SearchArgument searchArgument = SearchArgumentFactory
         .newBuilder()
         .startAnd()
-        .equals("a", new BigDecimal("0.1"))
+        .equals("a", PredicateLeaf.Type.DECIMAL, new HiveDecimalWritable("0.1"))
         .end()
         .build();
 
@@ -838,22 +879,22 @@ public class OrcFileTest {
   }
 
   @Test
-  public void readCharPredicatePushdown() throws IOException {
-    TypeInfo typeInfo = TypeInfoFactory.getCharTypeInfo(3);
+  public void readFloatPredicatePushdown() throws IOException {
+    TypeInfo typeInfo = TypeInfoFactory.floatTypeInfo;
 
     try (OrcWriter writer = getOrcWriter(typeInfo)) {
-      writer.addRow(new HiveChar("foo", 3));
-      writer.addRow(new HiveChar("bar", 3));
+      writer.addRow(0.0f);
+      writer.addRow(0.1f);
     }
 
     StructTypeInfo structTypeInfo = new StructTypeInfoBuilder().add("a", typeInfo).build();
 
     SearchArgument searchArgument = SearchArgumentFactory
-        .newBuilder()
-        .startAnd()
-        .equals("a", new HiveChar("foo", 5))
-        .end()
-        .build();
+            .newBuilder()
+            .startAnd()
+            .equals("a", PredicateLeaf.Type.FLOAT, 0.0)
+            .end()
+            .build();
 
     OrcFile orcFile = OrcFile.source().columns(structTypeInfo).schemaFromFile().searchArgument(searchArgument).build();
     Tap<?, ?, ?> tap = new Hfs(orcFile, path);
@@ -861,7 +902,7 @@ public class OrcFileTest {
     List<Tuple> list = Plunger.readDataFromTap(tap).asTupleList();
 
     assertThat(list.size(), is(1));
-    assertThat(list.get(0).getObject(0), is((Object) "foo"));
+    assertThat(list.get(0).getObject(0), is((Object) 0.0f));
   }
 
   @Test(expected = TupleException.class)

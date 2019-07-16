@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,15 @@ package com.hotels.corc.cascading;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.hotels.corc.mapred.CorcInputFormat;
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
+import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +42,7 @@ public class SearchArgumentFactoryTest {
 
   private static final Fields ONE = new Fields("A", Integer.class);
   private static final Fields TWO = new Fields(Fields.names("A", "B"), Fields.types(String.class, Integer.class));
+  private static final PredicateLeaf.Type ONE_TYPE = PredicateLeaf.Type.LONG;
 
   @Mock
   private org.apache.hadoop.hive.ql.io.sarg.SearchArgument.Builder mockInternal;
@@ -48,8 +53,8 @@ public class SearchArgumentFactoryTest {
   public void setup() {
     builder = new Builder(mockInternal);
     when(mockInternal.startNot()).thenReturn(mockInternal);
-    when(mockInternal.lessThan(anyString(), any())).thenReturn(mockInternal);
-    when(mockInternal.lessThanEquals(anyString(), any())).thenReturn(mockInternal);
+    when(mockInternal.lessThan(anyString(), same(ONE_TYPE), any())).thenReturn(mockInternal);
+    when(mockInternal.lessThanEquals(anyString(), same(ONE_TYPE), any())).thenReturn(mockInternal);
     when(mockInternal.end()).thenReturn(mockInternal);
   }
 
@@ -57,7 +62,7 @@ public class SearchArgumentFactoryTest {
   public void between() {
     Builder chain = builder.between(ONE, 1, 2);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).between("a", 1, 2);
+    verify(mockInternal).between("a", ONE_TYPE, 1, 2);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -89,7 +94,7 @@ public class SearchArgumentFactoryTest {
   public void equals() {
     Builder chain = builder.equals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).equals("a", 1);
+    verify(mockInternal).equals("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -116,7 +121,7 @@ public class SearchArgumentFactoryTest {
   public void lessThan() {
     Builder chain = builder.lessThan(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).lessThan("a", 1);
+    verify(mockInternal).lessThan("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -143,7 +148,7 @@ public class SearchArgumentFactoryTest {
   public void lessThanEquals() {
     Builder chain = builder.lessThanEquals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).lessThanEquals("a", 1);
+    verify(mockInternal).lessThanEquals("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -171,7 +176,7 @@ public class SearchArgumentFactoryTest {
     Builder chain = builder.greaterThan(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
     verify(mockInternal).startNot();
-    verify(mockInternal).lessThanEquals("a", 1);
+    verify(mockInternal).lessThanEquals("a", ONE_TYPE, 1);
     verify(mockInternal).end();
   }
 
@@ -200,7 +205,7 @@ public class SearchArgumentFactoryTest {
     Builder chain = builder.greaterThanEquals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
     verify(mockInternal).startNot();
-    verify(mockInternal).lessThan("a", 1);
+    verify(mockInternal).lessThan("a", ONE_TYPE, 1);
     verify(mockInternal).end();
   }
 
@@ -228,7 +233,7 @@ public class SearchArgumentFactoryTest {
   public void nullSafeEquals() {
     Builder chain = builder.nullSafeEquals(ONE, 1);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).nullSafeEquals("a", 1);
+    verify(mockInternal).nullSafeEquals("a", ONE_TYPE, 1);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -255,7 +260,7 @@ public class SearchArgumentFactoryTest {
   public void isNull() {
     Builder chain = builder.isNull(ONE);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).isNull("a");
+    verify(mockInternal).isNull("a", ONE_TYPE);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -282,7 +287,7 @@ public class SearchArgumentFactoryTest {
   public void in() {
     Builder chain = builder.in(ONE, 1, 2, 3);
     assertThat(chain, is(sameInstance(builder)));
-    verify(mockInternal).in("a", 1, 2, 3);
+    verify(mockInternal).in("a", ONE_TYPE, 1, 2, 3);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -416,22 +421,23 @@ public class SearchArgumentFactoryTest {
 
   @Test
   public void builderFactoryMethod() {
-    String kryoFromFields = SearchArgumentFactory
+    SearchArgument kryoFromFields = SearchArgumentFactory
         .newBuilder()
         .startAnd()
         .equals(new Fields("a", String.class), "hello")
         .end()
-        .build()
-        .toKryo();
-    String kryoFromString = org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory
+        .build();
+    String kryoFields = CorcInputFormat.toKryo(kryoFromFields);
+
+    SearchArgument kryoFromString = org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory
         .newBuilder()
         .startAnd()
-        .equals("a", "hello")
+        .equals("a", PredicateLeaf.Type.STRING, "hello")
         .end()
-        .build()
-        .toKryo();
+        .build();
+    String kryoString = CorcInputFormat.toKryo(kryoFromString);
 
-    assertThat(kryoFromFields, is(kryoFromString));
+    assertThat(kryoFields, is(kryoString));
   }
 
 }

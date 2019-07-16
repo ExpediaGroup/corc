@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.hotels.corc.cascading;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 
 import cascading.tuple.Fields;
+
+import static com.hotels.corc.cascading.FieldsTypeUtils.toType;
 
 /**
  * A {@link org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory} that uses {@link Fields}. Extracts the column name
@@ -54,7 +56,7 @@ public final class SearchArgumentFactory {
     public Builder between(Fields fields, Object lower, Object upper) {
       checkFields(fields);
       checkValueTypes(fields, lower, upper);
-      internalBuilder.between(toName(fields), lower, upper);
+      internalBuilder.between(toName(fields), toType(fields), lower, upper);
       return this;
     }
 
@@ -68,7 +70,7 @@ public final class SearchArgumentFactory {
     public Builder equals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.equals(toName(fields), literal);
+      internalBuilder.equals(toName(fields), toType(fields), literal);
       return this;
     }
 
@@ -79,7 +81,7 @@ public final class SearchArgumentFactory {
         checkValueTypes(fields, literals);
         // we just check types, leave the null/length validation to the original implementation.
       }
-      internalBuilder.in(toName(fields), literals);
+      internalBuilder.in(toName(fields), toType(fields), literals);
       return this;
     }
 
@@ -87,7 +89,7 @@ public final class SearchArgumentFactory {
     public Builder isNull(Fields fields) {
       checkFields(fields);
       checkValueTypes(fields, new Object[] { null });
-      internalBuilder.isNull(toName(fields));
+      internalBuilder.isNull(toName(fields), toType(fields));
       return this;
     }
 
@@ -95,7 +97,7 @@ public final class SearchArgumentFactory {
     public Builder lessThan(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.lessThan(toName(fields), literal);
+      internalBuilder.lessThan(toName(fields), toType(fields), literal);
       return this;
     }
 
@@ -103,7 +105,7 @@ public final class SearchArgumentFactory {
     public Builder lessThanEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.lessThanEquals(toName(fields), literal);
+      internalBuilder.lessThanEquals(toName(fields), toType(fields), literal);
       return this;
     }
 
@@ -115,7 +117,7 @@ public final class SearchArgumentFactory {
     public Builder greaterThan(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.startNot().lessThanEquals(toName(fields), literal).end();
+      internalBuilder.startNot().lessThanEquals(toName(fields), toType(fields), literal).end();
       return this;
     }
 
@@ -127,7 +129,7 @@ public final class SearchArgumentFactory {
     public Builder greaterThanEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.startNot().lessThan(toName(fields), literal).end();
+      internalBuilder.startNot().lessThan(toName(fields), toType(fields), literal).end();
       return this;
     }
     
@@ -135,7 +137,7 @@ public final class SearchArgumentFactory {
     public Builder nullSafeEquals(Fields fields, Object literal) {
       checkFields(fields);
       checkValueTypes(fields, literal);
-      internalBuilder.nullSafeEquals(toName(fields), literal);
+      internalBuilder.nullSafeEquals(toName(fields), toType(fields), literal);
       return this;
     }
 

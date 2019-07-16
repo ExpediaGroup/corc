@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,12 +266,19 @@ public class EvaluatorFactoryTest {
   @SuppressWarnings("rawtypes")
   @Test
   public void dateTypical() {
-    assertThat(toComparable(DATE, new DateWritable(new Date(0L))), is((Comparable) new DateWritable(new Date(0L))));
+    assertThat(toComparable(DATE, new Date(0L)), is((Comparable) new DateWritable(new Date(0L))));
   }
-
-  @Test(expected = ClassCastException.class)
-  public void dateWithDateInput() {
-    toComparable(DATE, new Date(0L));
+  
+  @SuppressWarnings("rawtypes")
+  @Test
+  public void dateAsTimestamp() {
+    assertThat(toComparable(DATE, new Timestamp(0L)), is((Comparable) new DateWritable(new Date(0L))));
+  }
+  
+  @SuppressWarnings("rawtypes")
+  @Test(expected = IllegalArgumentException.class)
+  public void unsupportedDateType() {
+    assertThat(toComparable(DATE, new Long(0L)), is((Comparable) new DateWritable(new Date(0L))));
   }
 
   @SuppressWarnings("rawtypes")
@@ -303,10 +310,6 @@ public class EvaluatorFactoryTest {
         is((Comparable) new HiveDecimalWritable(HiveDecimal.create(new BigDecimal("0.0")))));
   }
 
-  @Test(expected = ClassCastException.class)
-  public void decimalWithDecimalInput() {
-    toComparable(DECIMAL, HiveDecimal.create(new BigDecimal("0.0")));
-  }
 
   @Test(expected = IllegalArgumentException.class)
   public void binaryTypical() {

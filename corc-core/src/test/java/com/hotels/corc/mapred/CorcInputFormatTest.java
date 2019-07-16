@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.io.orc.OrcSplit;
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
 import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
@@ -112,8 +114,25 @@ public class CorcInputFormatTest {
     assertThat(splits.length, is(1));
     FileSplit actual = (FileSplit) splits[0];
     assertThat(actual.getPath().toUri().getRawPath(), is(path.toUri().getRawPath()));
-    assertThat(actual.getStart(), is(0L));
-    assertThat(actual.getLength(), is(file.length()));
+    assertThat(actual.getStart(), is(3L));
+    assertThat(actual.getLength(), is(136L));
+    OrcSplit orcSplit = (OrcSplit) actual;
+    assertThat(orcSplit.getFileLength(), is(file.length()));
+
+    // Read from the generated split...
+    StructTypeInfo typeInfo = new StructTypeInfoBuilder()
+            .add("a", TypeInfoFactory.stringTypeInfo)
+            .add("b", TypeInfoFactory.stringTypeInfo)
+            .build();
+    CorcInputFormat.setTypeInfo(conf, typeInfo);
+    CorcInputFormat.setConverterFactoryClass(conf, DefaultConverterFactory.class);
+    RecordReader<NullWritable, Corc> reader = inputFormat.getRecordReader(actual, conf, reporter);
+    Corc corc = reader.createValue();
+
+    reader.next(NullWritable.get(), corc);
+    assertThat(corc.get("a"), is((Object) "A1"));
+    assertThat(corc.get("b"), is((Object) "B1"));
+    reader.close();
   }
 
   @Test
@@ -288,12 +307,12 @@ public class CorcInputFormatTest {
 
   @Test
   public void setSearchArgument() {
-    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", PredicateLeaf.Type.STRING, "b").end().build();
     CorcInputFormat.setSearchArgument(conf, searchArgument);
 
     String kryo = conf.get(CorcInputFormat.SEARCH_ARGUMENT);
 
-    assertThat(kryo, is(searchArgument.toKryo()));
+    assertThat(kryo, is(CorcInputFormat.toKryo(searchArgument)));
   }
 
   @Test
@@ -316,19 +335,20 @@ public class CorcInputFormatTest {
 
   @Test
   public void getSearchArgument() {
-    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
-    conf.set(CorcInputFormat.SEARCH_ARGUMENT, searchArgument.toKryo());
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", PredicateLeaf.Type.STRING, "b").end().build();
+    conf.set(CorcInputFormat.SEARCH_ARGUMENT, CorcInputFormat.toKryo(searchArgument));
 
-    String kryo = CorcInputFormat.getSearchArgument(conf).toKryo();
+    SearchArgument sa = CorcInputFormat.getSearchArgument(conf);
+    String kryo = CorcInputFormat.toKryo(sa);
 
-    assertThat(kryo, is(searchArgument.toKryo()));
+    assertThat(kryo, is(CorcInputFormat.toKryo(searchArgument)));
   }
 
   @Test
   public void getFilterDisabledSearchArgument() {
     StructTypeInfo typeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
-    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
-    conf.set(CorcInputFormat.SEARCH_ARGUMENT, searchArgument.toKryo());
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", PredicateLeaf.Type.STRING, "b").end().build();
+    conf.set(CorcInputFormat.SEARCH_ARGUMENT, CorcInputFormat.toKryo(searchArgument));
     conf.setBoolean(CorcInputFormat.ENABLE_ROW_LEVEL_SEARCH_ARGUMENT, false);
 
     assertThat(CorcInputFormat.getFilter(conf, typeInfo), is(Filter.ACCEPT));
@@ -343,8 +363,8 @@ public class CorcInputFormatTest {
   @Test
   public void getFilterWithSearchArgument() {
     StructTypeInfo typeInfo = new StructTypeInfoBuilder().add("a", TypeInfoFactory.stringTypeInfo).build();
-    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", "b").end().build();
-    conf.set(CorcInputFormat.SEARCH_ARGUMENT, searchArgument.toKryo());
+    SearchArgument searchArgument = SearchArgumentFactory.newBuilder().startAnd().equals("a", PredicateLeaf.Type.STRING, "b").end().build();
+    conf.set(CorcInputFormat.SEARCH_ARGUMENT, CorcInputFormat.toKryo(searchArgument));
     assertThat(CorcInputFormat.getFilter(conf, typeInfo), instanceOf(SearchArgumentFilter.class));
   }
 

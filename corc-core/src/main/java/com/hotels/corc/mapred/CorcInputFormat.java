@@ -1,5 +1,10 @@
 /**
- * Copyright (C) 2015-2016 Expedia Inc.
+ * Copyright (C) 2015-2019 Expedia Inc and the original Hive project.
+ *
+ * The method toKryo(SearchArgument sarg) is a copy of:
+ *
+ * https://github.com/apache/hive/blob/master_2015_11_30/ql/src/test/
+ * org/apache/hadoop/hive/ql/io/orc/TestInputOutputFormat.java#L116
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +23,14 @@ package com.hotels.corc.mapred;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Output;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hive.ql.io.AcidInputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcFile;
 import org.apache.hadoop.hive.ql.io.orc.OrcInputFormat;
 import org.apache.hadoop.hive.ql.io.orc.OrcRecordUpdater;
@@ -29,7 +38,7 @@ import org.apache.hadoop.hive.ql.io.orc.OrcSplit;
 import org.apache.hadoop.hive.ql.io.orc.OrcStruct;
 import org.apache.hadoop.hive.ql.io.orc.Reader;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
-import org.apache.hadoop.hive.ql.io.sarg.SearchArgumentFactory;
+import org.apache.hadoop.hive.ql.io.sarg.ConvertAstToSearchArg;
 import org.apache.hadoop.hive.serde2.ColumnProjectionUtils;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
@@ -43,6 +52,7 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +152,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
    */
   public static void setSearchArgument(Configuration conf, SearchArgument searchArgument) {
     if (searchArgument != null) {
-      setSearchArgumentKryo(conf, searchArgument.toKryo());
+      setSearchArgumentKryo(conf, toKryo(searchArgument));
     }
   }
 
@@ -160,7 +170,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
     if (searchArgumentKryo == null) {
       return null;
     }
-    return SearchArgumentFactory.create(searchArgumentKryo);
+    return ConvertAstToSearchArg.create(searchArgumentKryo);
   }
 
   /**
@@ -195,7 +205,8 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
       throw new IllegalStateException("None of the selected columns were found in the ORC file.");
     }
     LOG.info("Set column projection on columns: {} ({})", ids, names);
-    ColumnProjectionUtils.appendReadColumns(conf, ids, names);
+    List<String> nestedColumnPaths = Collections.emptyList();
+    ColumnProjectionUtils.appendReadColumns(conf, ids, names, nestedColumnPaths);
   }
 
   private final OrcInputFormat orcInputFormat = new OrcInputFormat();
@@ -258,7 +269,7 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
     Path path = inputSplit.getPath();
     if (inputSplit instanceof OrcSplit) {
       OrcSplit orcSplit = (OrcSplit) inputSplit;
-      List<Long> deltas = orcSplit.getDeltas();
+      List<AcidInputFormat.DeltaMetaData> deltas = orcSplit.getDeltas();
       if (!orcSplit.hasBase() && deltas.size() >= 2) {
         throw new IOException("Cannot read valid StructTypeInfo from delta only file: " + path);
       }
@@ -301,6 +312,20 @@ public class CorcInputFormat implements InputFormat<NullWritable, Corc> {
       throw new RuntimeException("Could not obtain OrcRecordUpdater.ROW value.", e);
     }
 
+  }
+
+  /*
+   *  Copyright (C) the original Hive project.
+   *  The method toKryo(SearchArgument sarg) is a copy of:
+   *
+   *  https://github.com/apache/hive/blob/master_2015_11_30/ql/src/test/
+   *  org/apache/hadoop/hive/ql/io/orc/TestInputOutputFormat.java#L116
+   */
+  public static String toKryo(SearchArgument sarg) {
+    Output out = new Output(4 * 1024, 10 * 1024 * 1024);
+    new Kryo().writeObject(out, sarg);
+    out.close();
+    return Base64.encodeBase64String(out.toBytes());
   }
 
 }
