@@ -16,13 +16,13 @@
 package com.hotels.corc.cascading;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.ql.io.RecordIdentifier;
 import org.apache.hadoop.hive.ql.io.orc.OrcStruct;
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf;
 import org.apache.hadoop.hive.ql.io.sarg.SearchArgument;
 import org.apache.hadoop.hive.ql.metadata.VirtualColumn;
 import org.apache.hadoop.hive.serde2.objectinspector.SettableStructObjectInspector;
@@ -36,8 +36,10 @@ import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.OutputFormat;
 import org.apache.hadoop.mapred.RecordReader;
+import org.apache.hadoop.hive.ql.io.sarg.PredicateLeaf.Type;
 
 import cascading.flow.FlowProcess;
+import cascading.flow.planner.rule.UnsupportedPlanException;
 import cascading.scheme.Scheme;
 import cascading.scheme.SinkCall;
 import cascading.scheme.SourceCall;
@@ -408,6 +410,13 @@ public class OrcFile extends Scheme<Configuration, RecordReader, OutputCollector
     public SourceBuilder searchArgument(SearchArgument searchArgument) {
       checkExisting(this.searchArgument, "a search argument");
       checkNotNull(searchArgument, "searchArgument");
+      List<PredicateLeaf> leaves = searchArgument.getLeaves();
+      for (PredicateLeaf leaf : leaves) {
+        if (Type.TIMESTAMP.equals(leaf.getType())) {
+          //see OrcFileTest#readTimestampPredicatePushdown for info
+          throw new UnsupportedOperationException("Predicate pushdown for Timestamps is not currently supported by Corc");
+        }
+      }
       this.searchArgument = searchArgument;
       return this;
     }
