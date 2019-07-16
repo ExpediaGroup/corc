@@ -25,31 +25,34 @@ import java.lang.reflect.Type;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-public class FieldsTypeUtils {
+final class FieldsTypeUtils {
 
-    static PredicateLeaf.Type toType(Fields fields) {
-        Type type = fields.getType(0);
-        if (type.equals(Double.class)) {
-            return PredicateLeaf.Type.FLOAT;
-        } else if (type.equals(Long.class)) {
-            return PredicateLeaf.Type.LONG;
-        } else if (type.equals(Integer.class)) {
-            return PredicateLeaf.Type.LONG;
-        } else if (type.equals(Date.class)) {
-            return PredicateLeaf.Type.DATE;
-        } else if (type.equals(String.class)) {
-            return PredicateLeaf.Type.STRING;
-        } else if (type.equals(HiveChar.class)){
-            return PredicateLeaf.Type.STRING;
-        } else if (type.equals(HiveVarchar.class)){
-            return PredicateLeaf.Type.STRING;
-        } else if(type.equals(HiveDecimalWritable.class)) {
-            return PredicateLeaf.Type.DECIMAL;
-        } else if (type.equals(Timestamp.class)) {
-            return PredicateLeaf.Type.TIMESTAMP;
-        } else if (type.equals(Boolean.class)) {
-            return PredicateLeaf.Type.BOOLEAN;
-        }
-        throw new IllegalStateException("Can't map Fields.Type to PredicateLeaf.Type:" + fields);
+  private FieldsTypeUtils() {
+  }
+
+  static PredicateLeaf.Type toType(Fields fields) {
+    Type type = fields.getType(0);
+    if (type.equals(Double.class)) {
+        return PredicateLeaf.Type.FLOAT;
+    } else if (type.equals(Long.class)) {
+        return PredicateLeaf.Type.LONG;
+    } else if (type.equals(Integer.class)) {
+        return PredicateLeaf.Type.LONG;
+    } else if (type.equals(Date.class)) {
+        return PredicateLeaf.Type.DATE;
+    } else if (type.equals(String.class)) {
+        return PredicateLeaf.Type.STRING;
+    } else if (type.equals(HiveChar.class)){
+        return PredicateLeaf.Type.STRING;
+    } else if (type.equals(HiveVarchar.class)){
+        return PredicateLeaf.Type.STRING;
+    } else if(type.equals(HiveDecimalWritable.class)) {
+        return PredicateLeaf.Type.DECIMAL;
+    } else if (type.equals(Timestamp.class)) {
+        return PredicateLeaf.Type.TIMESTAMP;
+    } else if (type.equals(Boolean.class)) {
+        return PredicateLeaf.Type.BOOLEAN;
     }
+    throw new IllegalStateException("Can't map Fields.Type to PredicateLeaf.Type:" + fields);
+  }
 }
