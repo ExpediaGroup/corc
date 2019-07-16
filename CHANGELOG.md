@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Upgraded `cascading` version to  3.3.0 (was 3.0.2).
 - Upgraded `tez` version to 0.8.2 (was 0.6.2).
 
-##[2.0.3] - 2017-02-17
+##[2.0.3] - 2016-02-17
 ### Changed
 - Latest release of project
 

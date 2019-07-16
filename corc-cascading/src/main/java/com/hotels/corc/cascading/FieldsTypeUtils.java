@@ -25,7 +25,7 @@ import java.lang.reflect.Type;
 import java.sql.Date;
 import java.sql.Timestamp;
 
-final class FieldsTypeUtils {
+public final class FieldsTypeUtils {
 
   private FieldsTypeUtils() {
   }
