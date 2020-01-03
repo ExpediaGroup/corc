@@ -13,24 +13,22 @@ You can obtain **corc** from Maven Central :
 
 ## Cascading Dependencies
 
-Corc has been built and tested against Cascading 3.0.2.
-
-There is a known issue in 3.0.0 (fixed in 3.0.2) when writing small ORC files with Cascading and Tez (i.e. with only one stripe of data). At the point of committing the output, the writer has not flushed or closed so the ORC file is not materialized on disk.
+Corc has been built and tested against Cascading 3.3.0.
 
 ## Hive Dependencies
 
-Corc is built with Hive 1.0.0. Several dependencies will need to be included when using Corc:
+Corc is built with Hive 2.3.4. Several dependencies will need to be included when using Corc:
 
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-exec</artifactId>
-      <version>1.0.0</version>
+      <version>2.3.4</version>
       <classifier>core</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-serde</artifactId>
-      <version>1.0.0</version>
+      <version>2.3.4</version>
     </dependency>
     <dependency>
       <groupId>com.esotericsoftware.kryo</groupId>
@@ -188,5 +186,5 @@ Created by [Dave Maughan](https://github.com/nahguam) & [Elliot West](https://gi
 # Legal
 This project is available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-Copyright 2015-2017 Expedia Inc.
+Copyright 2015-2020 Expedia, Inc.
 
