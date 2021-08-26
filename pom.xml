@@ -23,9 +23,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/HotelsDotCom/corc.git</connection>
-    <developerConnection>scm:git:https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/HotelsDotCom/corc.git</developerConnection>
-    <url>https://github.com/HotelsDotCom/corc</url>
+    <connection>scm:git:https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/ExpediaGroup/corc.git</connection>
+    <developerConnection>scm:git:https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/ExpediaGroup/corc.git</developerConnection>
+    <url>https://github.com/ExpediaGroup/corc</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -124,7 +124,7 @@
       <version>${protobuf.version}</version>
       <scope>provided</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
